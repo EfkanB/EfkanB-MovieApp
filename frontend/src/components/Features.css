@@ -1,0 +1,22 @@
+.col-2 {
+  display: inline-block;
+  width: calc(50% - 2px);
+  height: 350px;
+  background-color: brown;
+}
+
+.features__left {
+  background: url('/features.jpeg');
+  background-size: cover;
+  background-position: top center;
+}
+
+.features__right {
+  background-color: #edf5f7;
+  padding: 40px;
+  vertical-align: top;
+}
+
+.features__right h3 {
+  font-size: 30px;
+}

@@ -1,0 +1,74 @@
+.movie-list {
+  padding: 40px 16px;
+  text-align: center;
+}
+
+.movie-list h2 {
+  font-size: 34px;
+  margin-bottom: 24px;
+  color: #3e4555;
+}
+
+.movie-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.movie-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+  text-align: left;
+}
+
+.movie-card h3 {
+  margin-top: 0;
+  font-size: 22px;
+  color: #2e4c6d;
+}
+
+.movie-meta {
+  color: #7b8a9a;
+  margin: 8px 0 16px;
+}
+
+.movie-card p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.movie-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid #fc997c;
+  color: #fc997c;
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-outline:hover {
+  background: #fc997c;
+  color: white;
+}
+
+.movie-error {
+  color: #c94d55;
+  font-weight: 600;
+}
+
+.favorite-list,
+.watchlist-list {
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid #e0e0e0;
+}

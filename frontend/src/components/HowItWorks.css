@@ -1,0 +1,31 @@
+#how-it-works {
+  padding: 10px;
+  text-align: center;
+}
+
+.row {
+  margin-bottom: 40px;
+}
+
+.col-3 {
+  display: inline-block;
+  width: 30%;
+  padding: 16px;
+  margin: 8px;
+}
+
+.icon-box h3 {
+  color: #3e4555;
+  font-size: 26px;
+}
+
+.icon-box i {
+  color: #FC997C;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #3e4555;
+  font-size: 30px;
+}

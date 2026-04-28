@@ -1,0 +1,18 @@
+#showcase {
+  background: url('/home-bg.jpeg');
+  background-position: center;
+  height: 500px;
+  width: 100%;
+  padding: 10px;
+  position: relative;
+}
+
+#showcase h1 {
+  position: absolute;
+  top: 50%;
+  margin: 0;
+  color: #fff;
+  font-size: 45px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

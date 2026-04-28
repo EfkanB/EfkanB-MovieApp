@@ -1,0 +1,15 @@
+#backtotop {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+}
+
+#backtotop i {
+  color: #FC997C;
+  font-size: 45px;
+  transition: color .6s;
+}
+
+#backtotop i:hover {
+  color: #fb6537;
+}

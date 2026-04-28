@@ -1,0 +1,14 @@
+# Node (React Frontend)
+frontend/node_modules/
+frontend/dist/
+.env
+
+# Maven (Spring Boot Backend)
+backend/target/
+*.jar
+*.war
+
+# IDE
+.vscode/
+.idea/
+*.iml
