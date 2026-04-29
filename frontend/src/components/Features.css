@@ -19,4 +19,14 @@
 
 .features__right h3 {
   font-size: 30px;
+  margin-bottom: 18px;
+}
+
+.features__right p {
+  margin-bottom: 24px;
+}
+
+.features__right a.btn {
+  display: inline-block;
+  margin-top: 16px;
 }

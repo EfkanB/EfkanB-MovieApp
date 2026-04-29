@@ -11,18 +11,37 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api") // Eğer eski kodunda farklı bir base URL varsa burayı değiştirebilirsin
+@RequestMapping("/api")
+@CrossOrigin(origins = "*")
 public class FavoriteController {
 
     @Autowired
     private UserService userService;
 
-    // JWT veya Session'dan kullanıcı adını çıkaran metodun
     private String extractUsername(HttpServletRequest request) {
-        return (String) request.getAttribute("username"); 
+        String username = (String) request.getAttribute("username");
+        if (username != null && !username.isBlank()) {
+            return username;
+        }
+
+        username = request.getHeader("X-Username");
+        if (username != null && !username.isBlank()) {
+            return username;
+        }
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            if (token.startsWith("dummy-")) {
+                return token.substring("dummy-".length());
+            }
+            return token;
+        }
+
+        throw new RuntimeException("Kullanıcı bilgisi bulunamadı");
     }
 
-    @GetMapping("/favorites")
+    @GetMapping({"/favorites", "/users/me/favorites"})
     public ResponseEntity<?> getFavorites(HttpServletRequest request) {
         try {
             String username = extractUsername(request);
@@ -33,18 +52,18 @@ public class FavoriteController {
         }
     }
 
-    @PostMapping("/favorites")
-    public ResponseEntity<?> addFavorite(@RequestBody AddContentRequest requestBody, HttpServletRequest request) {
+    @PostMapping({"/favorites/{contentId}", "/users/me/favorites/{contentId}"})
+    public ResponseEntity<?> addFavorite(@PathVariable Long contentId, HttpServletRequest request) {
         try {
             String username = extractUsername(request);
-            Set<Content> favorites = userService.addFavorite(username, requestBody.getContentId());
+            Set<Content> favorites = userService.addFavorite(username, contentId);
             return ResponseEntity.ok(favorites);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
-    @DeleteMapping("/favorites/{contentId}")
+    @DeleteMapping({"/favorites/{contentId}", "/users/me/favorites/{contentId}"})
     public ResponseEntity<?> removeFavorite(@PathVariable Long contentId, HttpServletRequest request) {
         try {
             String username = extractUsername(request);
@@ -53,12 +72,5 @@ public class FavoriteController {
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
-    }
-
-    // JSON içindeki ID'yi yakalamak için kullandığımız yardımcı sınıf (DTO)
-    public static class AddContentRequest {
-        private Long contentId;
-        public Long getContentId() { return contentId; }
-        public void setContentId(Long contentId) { this.contentId = contentId; }
     }
 }

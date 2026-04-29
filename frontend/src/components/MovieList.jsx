@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './MovieList.css';
 
-const MovieList = ({ token }) => {
+const MovieList = ({ token, username }) => {
   const [movies, setMovies] = useState([]);
   const [favoriteMovies, setFavoriteMovies] = useState([]);
   const [watchlistMovies, setWatchlistMovies] = useState([]);
@@ -9,10 +9,23 @@ const MovieList = ({ token }) => {
   const [watchlistIds, setWatchlistIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchMovies = async () => {
+  const authHeaders = () => {
+    const headers = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    if (username) {
+      headers['X-Username'] = username;
+    }
+    return headers;
+  };
+
+  const fetchMovies = async (query = '') => {
     try {
-      const response = await fetch('/api/movies');
+      const url = query ? `/api/content/search?title=${encodeURIComponent(query)}` : '/api/movies';
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Filmler getirilemedi');
       }
@@ -26,16 +39,15 @@ const MovieList = ({ token }) => {
   };
 
   const fetchFavorites = async () => {
-    if (!token) {
+    if (!token || !username) {
       setFavoriteIds(new Set());
+      setFavoriteMovies([]);
       return;
     }
 
     try {
       const response = await fetch('/api/users/me/favorites', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: authHeaders(),
       });
       if (!response.ok) {
         throw new Error('Favoriler getirilemedi');
@@ -49,16 +61,15 @@ const MovieList = ({ token }) => {
   };
 
   const fetchWatchlist = async () => {
-    if (!token) {
+    if (!token || !username) {
       setWatchlistIds(new Set());
+      setWatchlistMovies([]);
       return;
     }
 
     try {
       const response = await fetch('/api/users/me/watchlist', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: authHeaders(),
       });
       if (!response.ok) {
         throw new Error('İzleme listesi getirilemedi');
@@ -72,18 +83,29 @@ const MovieList = ({ token }) => {
   };
 
   useEffect(() => {
-    fetchMovies();
+    const timer = setTimeout(() => {
+      setLoading(true);
+      fetchMovies(searchQuery);
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchMovies(searchQuery);
   }, []);
 
   useEffect(() => {
-    if (token) {
+    if (token && username) {
       fetchFavorites();
       fetchWatchlist();
     } else {
       setFavoriteIds(new Set());
       setWatchlistIds(new Set());
+      setFavoriteMovies([]);
+      setWatchlistMovies([]);
     }
-  }, [token]);
+  }, [token, username]);
 
   const updateFavoriteIds = (movieList) => {
     setFavoriteMovies(movieList);
@@ -96,7 +118,7 @@ const MovieList = ({ token }) => {
   };
 
   const handleToggleFavorite = async (movieId, add) => {
-    if (!token) {
+    if (!token || !username) {
       setError('Favorilere eklemek için giriş yapın.');
       return;
     }
@@ -104,10 +126,7 @@ const MovieList = ({ token }) => {
     try {
       const response = await fetch(`/api/users/me/favorites/${movieId}`, {
         method: add ? 'POST' : 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: authHeaders(),
       });
 
       if (!response.ok) {
@@ -122,7 +141,7 @@ const MovieList = ({ token }) => {
   };
 
   const handleToggleWatchlist = async (movieId, add) => {
-    if (!token) {
+    if (!token || !username) {
       setError('İzleme listesine eklemek için giriş yapın.');
       return;
     }
@@ -130,10 +149,7 @@ const MovieList = ({ token }) => {
     try {
       const response = await fetch(`/api/users/me/watchlist/${movieId}`, {
         method: add ? 'POST' : 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: authHeaders(),
       });
 
       if (!response.ok) {
@@ -161,7 +177,16 @@ const MovieList = ({ token }) => {
 
   return (
     <section className="movie-list">
-      <h2>Filmler</h2>
+      <div className="movie-list__toolbar">
+        <h2>Filmler</h2>
+        <input
+          type="search"
+          className="movie-list__search"
+          placeholder="Film başlığına göre ara..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
       {movies.length === 0 ? (
         <p>Henüz film yok.</p>
       ) : (
@@ -175,21 +200,21 @@ const MovieList = ({ token }) => {
                 <div className="movie-actions">
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className={`btn btn-secondary ${isFavorite(movie.id) ? 'active' : ''}`}
                     onClick={() => handleToggleFavorite(movie.id, !isFavorite(movie.id))}
                   >
-                    {isFavorite(movie.id) ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
+                    {isFavorite(movie.id) ? '♥ Favorilerden Çıkar' : '♡ Favorilere Ekle'}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-outline"
+                    className={`btn btn-outline ${isInWatchlist(movie.id) ? 'active' : ''}`}
                     onClick={() => handleToggleWatchlist(movie.id, !isInWatchlist(movie.id))}
                   >
-                    {isInWatchlist(movie.id) ? 'İzleme Listesinden Çıkar' : 'İzleme Listesine Ekle'}
+                    {isInWatchlist(movie.id) ? '− İzleme Listesinden Çıkar' : '+ İzleme Listesine Ekle'}
                   </button>
                 </div>
               ) : (
-                <p className="movie-note">Favorilere eklemek için giriş yapın.</p>
+                <p className="movie-note">Favorilere ve izlemlisteye eklemek için giriş yapın.</p>
               )}
             </article>
           ))}
@@ -212,7 +237,7 @@ const MovieList = ({ token }) => {
                     className="btn btn-secondary"
                     onClick={() => handleToggleFavorite(movie.id, false)}
                   >
-                    Favorilerden Çıkar
+                    ♥ Favorilerden Çıkar
                   </button>
                 </article>
               ))}
@@ -235,17 +260,17 @@ const MovieList = ({ token }) => {
                   <div className="movie-actions">
                     <button
                       type="button"
-                      className="btn btn-secondary"
+                      className={`btn btn-secondary ${isFavorite(movie.id) ? 'active' : ''}`}
                       onClick={() => handleToggleFavorite(movie.id, !isFavorite(movie.id))}
                     >
-                      {isFavorite(movie.id) ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
+                      {isFavorite(movie.id) ? '♥ Favorilerden Çıkar' : '♡ Favorilere Ekle'}
                     </button>
                     <button
                       type="button"
                       className="btn btn-outline"
                       onClick={() => handleToggleWatchlist(movie.id, false)}
                     >
-                      İzleme Listesinden Çıkar
+                      − İzleme Listesinden Çıkar
                     </button>
                   </div>
                 </article>

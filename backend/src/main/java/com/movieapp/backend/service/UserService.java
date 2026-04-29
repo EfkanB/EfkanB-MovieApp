@@ -1,9 +1,11 @@
 package com.movieapp.backend.service;
 
 import com.movieapp.backend.model.Content;
+import com.movieapp.backend.model.Role;
 import com.movieapp.backend.model.User;
 import com.movieapp.backend.repository.ContentRepository;
 import com.movieapp.backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,16 @@ public class UserService {
         return Optional.empty();
     }
 
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public boolean isAdmin(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> user.getRole() == Role.ADMIN)
+                .orElse(false);
+    }
+
     // Artık Set<Movie> değil, Set<Content> dönüyor
     public Set<Content> getFavorites(String username) {
         User user = userRepository.findByUsername(username)
@@ -52,6 +64,7 @@ public class UserService {
         return user.getFavorites();
     }
 
+    @Transactional
     public Set<Content> addFavorite(String username, Long contentId) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -61,6 +74,7 @@ public class UserService {
         return userRepository.save(user).getFavorites();
     }
 
+    @Transactional
     public Set<Content> removeFavorite(String username, Long contentId) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -76,6 +90,7 @@ public class UserService {
         return user.getWatchlist();
     }
 
+    @Transactional
     public Set<Content> addToWatchlist(String username, Long contentId) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -85,6 +100,7 @@ public class UserService {
         return userRepository.save(user).getWatchlist();
     }
 
+    @Transactional
     public Set<Content> removeFromWatchlist(String username, Long contentId) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));

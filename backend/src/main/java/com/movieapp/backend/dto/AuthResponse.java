@@ -2,13 +2,15 @@ package com.movieapp.backend.dto;
 
 public class AuthResponse {
     private String username;
+    private String role;
     private String token;
 
     public AuthResponse() {
     }
 
-    public AuthResponse(String username, String token) {
+    public AuthResponse(String username, String role, String token) {
         this.username = username;
+        this.role = role;
         this.token = token;
     }
 
@@ -18,6 +20,14 @@ public class AuthResponse {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getToken() {

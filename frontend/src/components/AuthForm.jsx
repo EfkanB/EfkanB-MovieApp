@@ -24,7 +24,8 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
       
       if (response.ok) {
         const providedUsername = data.username || username;
-        onAuthSuccess(providedUsername, data.token);
+        const userRole = data.role || 'USER';
+        onAuthSuccess(providedUsername, data.token, userRole);
         return;
       } else {
         // DÜZELTİLEN KISIM: Gelen veri obje olsa bile sadece metin (string) almasını sağladık

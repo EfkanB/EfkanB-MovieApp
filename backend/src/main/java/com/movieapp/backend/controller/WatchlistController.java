@@ -12,16 +12,36 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*")
 public class WatchlistController {
 
     @Autowired
     private UserService userService;
 
     private String extractUsername(HttpServletRequest request) {
-        return (String) request.getAttribute("username");
+        String username = (String) request.getAttribute("username");
+        if (username != null && !username.isBlank()) {
+            return username;
+        }
+
+        username = request.getHeader("X-Username");
+        if (username != null && !username.isBlank()) {
+            return username;
+        }
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            if (token.startsWith("dummy-")) {
+                return token.substring("dummy-".length());
+            }
+            return token;
+        }
+
+        throw new RuntimeException("Kullanıcı bilgisi bulunamadı");
     }
 
-    @GetMapping("/watchlist")
+    @GetMapping({"/watchlist", "/users/me/watchlist"})
     public ResponseEntity<?> getWatchlist(HttpServletRequest request) {
         try {
             String username = extractUsername(request);
@@ -32,18 +52,18 @@ public class WatchlistController {
         }
     }
 
-    @PostMapping("/watchlist")
-    public ResponseEntity<?> addToWatchlist(@RequestBody AddContentRequest requestBody, HttpServletRequest request) {
+    @PostMapping({"/watchlist/{contentId}", "/users/me/watchlist/{contentId}"})
+    public ResponseEntity<?> addToWatchlist(@PathVariable Long contentId, HttpServletRequest request) {
         try {
             String username = extractUsername(request);
-            Set<Content> watchlist = userService.addToWatchlist(username, requestBody.getContentId());
+            Set<Content> watchlist = userService.addToWatchlist(username, contentId);
             return ResponseEntity.ok(watchlist);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
-    @DeleteMapping("/watchlist/{contentId}")
+    @DeleteMapping({"/watchlist/{contentId}", "/users/me/watchlist/{contentId}"})
     public ResponseEntity<?> removeFromWatchlist(@PathVariable Long contentId, HttpServletRequest request) {
         try {
             String username = extractUsername(request);
@@ -52,11 +72,5 @@ public class WatchlistController {
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
-    }
-
-    public static class AddContentRequest {
-        private Long contentId;
-        public Long getContentId() { return contentId; }
-        public void setContentId(Long contentId) { this.contentId = contentId; }
     }
 }

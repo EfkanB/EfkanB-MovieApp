@@ -10,6 +10,8 @@ Modern yazılım mühendisliği standartlarına uygun olarak Katmanlı Mimari (L
 - **Puanlama ve Yorum (Review):** İçeriklere 1-10 arası puan verip yorum yapabilme özelliği.
 - **Rol Bazlı Yetkilendirme (Role-Based Auth):** `USER` ve `ADMIN` rolleri.
 - **Admin Paneli:** Sadece yetkili kullanıcıların yeni içerik (film/dizi) ekleyebilmesi için güvenli endpointler.
+- **Admin API Kontrolü:** `/api/admin/**` uç noktaları artık yalnızca `ADMIN` rolüne sahip kullanıcılar tarafından kullanılabilir.
+- **Admin Linki:** `ADMIN` rolündeki kullanıcılar için front-end Header'da yalnızca onlara görünen bir `İçerik Ekle` linki gösterilir.
 - **Frontend Yönetimi:** Vite proxy ile `/api` çağrılarının backend'e güvenli yönlendirilmesi ve React state yönetimi.
 
 ##  Kullanılan Teknolojiler

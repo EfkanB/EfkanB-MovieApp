@@ -5,8 +5,32 @@
 
 .movie-list h2 {
   font-size: 34px;
-  margin-bottom: 24px;
+  margin: 0;
   color: #3e4555;
+}
+
+.movie-list__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.movie-list__search {
+  max-width: 320px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  outline: none;
+  font-size: 16px;
+}
+
+.movie-list__search:focus {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+  border-color: #3b82f6;
 }
 
 .movie-grid {

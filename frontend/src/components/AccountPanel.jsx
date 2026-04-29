@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import './AccountPanel.css';
 
-const AccountPanel = ({ token, username }) => {
+const AccountPanel = ({ token, username, initialSection = 'details' }) => {
   const [favorites, setFavorites] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
-  const [currentSection, setCurrentSection] = useState('details');
+  const [currentSection, setCurrentSection] = useState(initialSection);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -62,9 +62,67 @@ const AccountPanel = ({ token, username }) => {
   };
 
   useEffect(() => {
+    setCurrentSection(initialSection || 'details');
+  }, [initialSection]);
+
+  useEffect(() => {
     fetchFavorites();
     fetchWatchlist();
   }, [token]);
+
+  const handleRemoveFavorite = async (contentId) => {
+    if (!token) {
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`/api/users/me/favorites/${contentId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Favori kaldırılamadı');
+      }
+
+      await fetchFavorites();
+    } catch (err) {
+      setError(err.message || 'Favori kaldırılamadı');
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveWatchlist = async (contentId) => {
+    if (!token) {
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`/api/users/me/watchlist/${contentId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('İzleme listesi kaldırılamadı');
+      }
+
+      await fetchWatchlist();
+    } catch (err) {
+      setError(err.message || 'İzleme listesi kaldırılamadı');
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="account-panel">
@@ -118,7 +176,7 @@ const AccountPanel = ({ token, username }) => {
         ) : currentSection === 'favorites' ? (
           <div className="account-card">
             <div className="account-card__header">
-              <h2>Favori Filmler</h2>
+              <h2>Favoriler</h2>
               <span className="heart-icon large">♥</span>
             </div>
             {loading ? (
@@ -126,7 +184,7 @@ const AccountPanel = ({ token, username }) => {
             ) : error ? (
               <p className="account-error">{error}</p>
             ) : favorites.length === 0 ? (
-              <p>Henüz favori film eklemediniz.</p>
+              <p>Henüz favori içerik eklemediniz.</p>
             ) : (
               <div className="favorite-grid">
                 {favorites.map((movie) => (
@@ -134,6 +192,13 @@ const AccountPanel = ({ token, username }) => {
                     <h3>{movie.title}</h3>
                     <p className="movie-meta">{movie.genre} · {movie.releaseYear}</p>
                     <p>{movie.description}</p>
+                    <button
+                      type="button"
+                      className="remove-button"
+                      onClick={() => handleRemoveFavorite(movie.id)}
+                    >
+                      Favorilerden Kaldır
+                    </button>
                   </article>
                 ))}
               </div>
@@ -150,7 +215,7 @@ const AccountPanel = ({ token, username }) => {
             ) : error ? (
               <p className="account-error">{error}</p>
             ) : watchlist.length === 0 ? (
-              <p>Henüz izleme listesine film eklemediniz.</p>
+              <p>Henüz izleme listesine içerik eklemediniz.</p>
             ) : (
               <div className="favorite-grid">
                 {watchlist.map((movie) => (
@@ -158,6 +223,13 @@ const AccountPanel = ({ token, username }) => {
                     <h3>{movie.title}</h3>
                     <p className="movie-meta">{movie.genre} · {movie.releaseYear}</p>
                     <p>{movie.description}</p>
+                    <button
+                      type="button"
+                      className="remove-button"
+                      onClick={() => handleRemoveWatchlist(movie.id)}
+                    >
+                      İzleme Listesinden Kaldır
+                    </button>
                   </article>
                 ))}
               </div>
