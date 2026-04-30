@@ -95,6 +95,11 @@
   margin-bottom: 18px;
 }
 
+.account-card p {
+  margin: 0 0 14px;
+  line-height: 1.75;
+}
+
 .account-card h2 {
   margin: 0 0 12px;
 }
@@ -108,19 +113,25 @@
 .favorite-card {
   background: #f7f7f7;
   border-radius: 14px;
-  padding: 18px;
+  padding: 20px 22px;
 }
 
 .favorite-card h3 {
   margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.favorite-card p {
+  margin: 0 0 12px;
+  line-height: 1.7;
 }
 
 .remove-button {
-  margin-top: 14px;
+  margin-top: 16px;
   background: #fc997c;
   color: #fff;
   border: none;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: 14px;
   cursor: pointer;
   font-weight: 700;

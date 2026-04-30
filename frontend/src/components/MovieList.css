@@ -39,12 +39,40 @@
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
+.content-section {
+  margin-bottom: 40px;
+  padding: 0 12px;
+}
+
 .movie-card {
   background: #fff;
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
   text-align: left;
+}
+
+.movie-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.movie-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(252, 153, 124, 0.15);
+  color: #d35400;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .movie-card h3 {
@@ -68,6 +96,7 @@
   gap: 12px;
   margin-top: 16px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .btn-outline {
@@ -78,6 +107,9 @@
   padding: 10px 16px;
   cursor: pointer;
   font-weight: 700;
+  min-width: 120px;
+  text-align: center;
+  transition: all 0.2s ease;
 }
 
 .btn-outline:hover {
@@ -93,6 +125,12 @@
 .favorite-list,
 .watchlist-list {
   margin-top: 60px;
-  padding-top: 40px;
+  padding: 28px 0 40px;
   border-top: 1px solid #e0e0e0;
+}
+
+.favorite-list h2,
+.watchlist-list h2 {
+  margin-bottom: 18px;
+  padding-left: 12px;
 }

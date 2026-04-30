@@ -18,6 +18,8 @@ function App() {
   const [username, setUsername] = useState(null);
   const [role, setRole] = useState(null);
   const [accountSection, setAccountSection] = useState('details');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [contentType, setContentType] = useState('all'); // 'all', 'movies', 'series'
 
   // Sayfa yüklendiğinde localStorage'dan giriş bilgilerini yükle
   useEffect(() => {
@@ -79,6 +81,19 @@ function App() {
 
   const handleHomeClick = () => {
     setView('home');
+    setContentType('all');
+    setShowAuth(false);
+  };
+
+  const handleSeriesClick = () => {
+    setView('home');
+    setContentType('series');
+    setShowAuth(false);
+  };
+
+  const handleMoviesClick = () => {
+    setView('home');
+    setContentType('movies');
     setShowAuth(false);
   };
 
@@ -99,6 +114,8 @@ function App() {
       <Header
         onLoginClick={handleLoginClick}
         onHomeClick={handleHomeClick}
+        onSeriesClick={handleSeriesClick}
+        onMoviesClick={handleMoviesClick}
         onAdminClick={handleAdminClick}
         onAccountClick={handleAccountClick}
         onFavoritesClick={handleFavoritesClick}
@@ -106,6 +123,8 @@ function App() {
         isLoggedIn={!!token}
         username={username}
         role={role}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
       <main>
         {showAuth ? (
@@ -117,7 +136,7 @@ function App() {
         ) : (
           <>
             <Showcase />
-            <MovieList token={token} username={username} />
+            <MovieList token={token} username={username} searchQuery={searchQuery} contentType={contentType} />
             <HowItWorks />
             <Features />
             <Plans />

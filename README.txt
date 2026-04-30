@@ -1,109 +1,89 @@
-#  MovieApp Full Stack Application
+MovieApp; kullanıcıların film ve dizileri keşfedebileceği, kişisel listeler oluşturabileceği ve içerikleri değerlendirebileceği, uçtan uca modern teknolojilerle geliştirilmiş bir içerik yönetim platformudur. Proje; **Katmanlı Mimari (Layered Architecture)** ve **Nesne Yönelimli Programlama (OOP)** prensipleri temel alınarak, yüksek kod kalitesi ve ölçeklenebilirlik hedeflenerek inşa edilmiştir.
 
-Bu proje, başlangıçta statik bir HTML/CSS MovieApp tanıtım sayfası iken güncellenerek tam çalışır bir React + Spring Boot + MySQL uygulamasına dönüştürüldü. 
-Modern yazılım mühendisliği standartlarına uygun olarak Katmanlı Mimari (Layered Architecture) ve Nesne Yönelimli Programlama (OOP) prensipleri ile geliştirilmiştir.
+## Öne Çıkan Özellikler
 
-## 🇹🇷 Uygulamanın Özellikleri
-- **Kullanıcı Sistemi:** Kayıt olma ve giriş yapma (JWT tabanlı token doğrulama).
-- **Genişletilmiş İçerik Yönetimi (Polymorphism):** `Content` ana sınıfından türeyen `Movie` (Film) ve `Series` (Dizi) desteği.
-- **Çift Liste Yönetimi:** Kullanıcılar içerikleri hem **Favorilerine** hem de **İzleme Listelerine (Watchlist)** ekleyebilir/çıkarabilir.
-- **Puanlama ve Yorum (Review):** İçeriklere 1-10 arası puan verip yorum yapabilme özelliği.
-- **Rol Bazlı Yetkilendirme (Role-Based Auth):** `USER` ve `ADMIN` rolleri.
-- **Admin Paneli:** Sadece yetkili kullanıcıların yeni içerik (film/dizi) ekleyebilmesi için güvenli endpointler.
-- **Admin API Kontrolü:** `/api/admin/**` uç noktaları artık yalnızca `ADMIN` rolüne sahip kullanıcılar tarafından kullanılabilir.
-- **Admin Linki:** `ADMIN` rolündeki kullanıcılar için front-end Header'da yalnızca onlara görünen bir `İçerik Ekle` linki gösterilir.
-- **Frontend Yönetimi:** Vite proxy ile `/api` çağrılarının backend'e güvenli yönlendirilmesi ve React state yönetimi.
+- **Gelişmiş Veri Modeli (Polymorphism):** `Content` ana sınıfından türetilen `Movie` ve `Series` yapıları ile veritabanında **JPA Joined Inheritance** stratejisi uygulanmıştır.
+- **Güvenli Kimlik Doğrulama:** Spring Security ve **JWT (JSON Web Token)** kullanılarak güvenli kayıt/giriş mekanizması kurgulanmıştır.
+- **Çift Liste Yönetimi:** Kullanıcılar içerikleri bağımsız olarak hem **Favorilerine** hem de **İzleme Listelerine (Watchlist)** ekleyebilir.
+- **Review & Rating Sistemi:** İçeriklere 1-10 arası puan verme ve yorum yapma imkanı.
+- **Dinamik Arama:** Backend tarafında optimize edilmiş sorgularla başlığa göre anlık arama desteği.
+- **Rol Bazlı Yetkilendirme (RBAC):** `USER` ve `ADMIN` rolleri ile yetki kontrolü. Admin kullanıcılar için özel içerik yönetim paneli.
+- **Seed Data:** Uygulama ayağa kalktığında otomatik olarak popüler içerikleri yükleyen başlangıç verisi yapılandırması.
 
 ##  Kullanılan Teknolojiler
-- **Frontend:** React, Vite, CSS
-- **Backend:** Java, Spring Boot 3, Spring Data JPA, Spring Security (JWT)
-- **Veritabanı:** MySQL
-- **Proje Yapılandırması:** Maven
+
+- **Backend:** Java 17, Spring Boot 3, Spring Security, JWT, Spring Data JPA, Hibernate.
+- **Frontend:** React.js, Vite, CSS3 (Responsive UI), Axios.
+- **Veritabanı:** MySQL.
+- **Araçlar:** Maven, Git, Postman.
 
 ---
 
 ##  Kurulum ve Çalıştırma (How to Run)
 
-Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları izleyin:
-
-### 1. Veritabanı Hazırlığı (MySQL)
-Öncelikle MySQL üzerinde boş bir veritabanı oluşturun:
+### 1. Veritabanı Hazırlığı
+MySQL üzerinde aşağıdaki komutla veritabanını oluşturun:
 ```sql
 CREATE DATABASE movieapp;
-2. Backend'i Çalıştırma (Spring Boot)
-backend/src/main/resources/application.properties dosyasını açın.
+2. Backend Yapılandırması
+backend/src/main/resources/application.properties dosyasındaki spring.datasource.username ve password alanlarını kendi MySQL bilgilerinizle güncelleyin.
 
-MySQL username ve password bilgilerinizi kendi bilgisayarınıza göre güncelleyin.
-
-Terminali açıp backend klasörüne gidin ve projeyi başlatın:
+Terminalden backend klasörüne gidin:
 
 Bash
-cd backend
 mvn spring-boot:run
-(Not: Tablolar ddl-auto=update sayesinde veritabanında otomatik olarak oluşturulacaktır.)
-
-3. Frontend'i Çalıştırma (React)
-Yeni bir terminal açıp frontend klasörüne gidin ve bağımlılıkları yükleyip projeyi başlatın:
+3. Frontend Yapılandırması
+frontend klasörüne gidin, bağımlılıkları yükleyin ve projeyi başlatın:
 
 Bash
-cd frontend
 npm install
 npm run dev
-Uygulama http://localhost:5173 adresinde çalışmaya başlayacaktır.
+Uygulama varsayılan olarak http://localhost:5173 adresinde çalışacaktır.
 
- MovieApp Full Stack Application (English)
-This project started as a static HTML/CSS MovieApp landing page and was upgraded into a fully working, robust React + Spring Boot + MySQL application.
-It is built using Layered Architecture and Object-Oriented Programming (OOP) principles to meet modern software engineering standards.
+ MovieApp Full-Stack Content Platform (English)
+MovieApp is a modern, end-to-end content management platform where users can discover, rate, and manage movies and TV series. The project is built following Layered Architecture and Object-Oriented Programming (OOP) principles, ensuring industrial standards for code quality and maintainability.
 
- Features
-Authentication: User registration and login with JWT-based secure authentication.
+ Key Features
+Advanced Data Modeling (Polymorphism): Implementation of JPA Joined Inheritance for Movie and Series entities inherited from a base Content class.
 
-Advanced Content System (Polymorphism): Supports both Movie and Series inherited from a base Content entity using JPA JOINED strategy.
+Secure Authentication: Robust sign-up/login flow integrated with Spring Security and JWT (JSON Web Token).
 
-Dual List Management: Users can add content to both their Favorites and Watchlist independently.
+Dual List Management: Independent management of Favorites and Watchlist for each user.
 
-Review System: Users can rate content (1-10) and leave comments.
+Review & Rating System: Ability to leave comments and rate content on a scale of 1-10.
 
-Role-Based Authorization: Built-in USER and ADMIN roles.
+Dynamic Search: Real-time search functionality filtered by title using optimized backend queries.
 
-Admin Panel: Secure endpoints allowing only admins to create or manage movies and series.
+Role-Based Access Control (RBAC): Distinction between USER and ADMIN roles, featuring a restricted Admin Panel for content creation.
 
-Frontend Flow: React state management with Vite proxy configuration routing to /api.
+Automatic Seed Data: Built-in initializer to populate the database with popular titles upon application startup.
 
- Technologies Used
-Frontend: React, Vite, CSS
+ Tech Stack
+Backend: Java 17, Spring Boot 3, Spring Security, JWT, Spring Data JPA, Hibernate.
 
-Backend: Java, Spring Boot 3, Spring Data JPA, Spring Security (JWT)
+Frontend: React.js, Vite, CSS3, Axios.
 
-Database: MySQL
+Database: MySQL.
 
-Build Tool: Maven
+Build & Tools: Maven, Git, Postman.
 
- How to Run (Setup Instructions)
-Follow these steps to run the project locally on your machine:
-
-1. Database Setup (MySQL)
-First, create an empty database in your MySQL server:
+ Setup Instructions
+1. Database Setup
+Create a database in your local MySQL instance:
 
 SQL
 CREATE DATABASE movieapp;
-2. Running the Backend (Spring Boot)
-Navigate to backend/src/main/resources/application.properties.
+2. Running the Backend
+Update backend/src/main/resources/application.properties with your MySQL credentials.
 
-Update the database username and password with your local MySQL credentials.
-
-Open a terminal, navigate to the backend folder, and run the application:
+Navigate to the backend directory and run:
 
 Bash
-cd backend
 mvn spring-boot:run
-(Note: Hibernate will automatically generate all necessary tables using the ddl-auto=update configuration.)
-
-3. Running the Frontend (React)
-Open a new terminal window, navigate to the frontend folder, install dependencies, and start the development server:
+3. Running the Frontend
+Navigate to the frontend directory, install dependencies, and start the development server:
 
 Bash
-cd frontend
 npm install
 npm run dev
 The application will be accessible at http://localhost:5173.

@@ -2,6 +2,7 @@ package com.movieapp.backend.controller;
 
 import com.movieapp.backend.model.Content;
 import com.movieapp.backend.service.UserService;
+import com.movieapp.backend.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,9 @@ public class FavoriteController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     private String extractUsername(HttpServletRequest request) {
         String username = (String) request.getAttribute("username");
@@ -35,7 +39,9 @@ public class FavoriteController {
             if (token.startsWith("dummy-")) {
                 return token.substring("dummy-".length());
             }
-            return token;
+            if (jwtUtil.validateToken(token)) {
+                return jwtUtil.getUsernameFromToken(token);
+            }
         }
 
         throw new RuntimeException("Kullanıcı bilgisi bulunamadı");

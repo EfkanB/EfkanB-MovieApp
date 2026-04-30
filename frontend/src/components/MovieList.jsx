@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import ReviewSection from './ReviewSection';
 import './MovieList.css';
 
-const MovieList = ({ token, username }) => {
+const MovieList = ({ token, username, searchQuery, contentType = 'all' }) => {
   const [movies, setMovies] = useState([]);
+  const [series, setSeries] = useState([]);
+  const [searchResults, setSearchResults] = useState(null);
   const [favoriteMovies, setFavoriteMovies] = useState([]);
   const [watchlistMovies, setWatchlistMovies] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [watchlistIds, setWatchlistIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const authHeaders = () => {
     const headers = {};
@@ -22,15 +24,61 @@ const MovieList = ({ token, username }) => {
     return headers;
   };
 
-  const fetchMovies = async (query = '') => {
+  const getContentTypeLabel = (item) => {
+    if (item.seasonCount != null || item.episodeCount != null) {
+      return 'Dizi';
+    }
+    return 'Film';
+  };
+
+  const fetchContent = async (query = '') => {
+    setError('');
+    setLoading(true);
+
     try {
-      const url = query ? `/api/content/search?title=${encodeURIComponent(query)}` : '/api/movies';
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Filmler getirilemedi');
+      if (query) {
+        const response = await fetch(`/api/content/search?title=${encodeURIComponent(query)}`);
+        if (!response.ok) {
+          throw new Error('Arama sonuçları getirilemedi');
+        }
+        const data = await response.json();
+        setSearchResults(data);
+        setMovies([]);
+        setSeries([]);
+      } else {
+        setSearchResults(null);
+        if (contentType === 'movies') {
+          const response = await fetch('/api/movies');
+          if (!response.ok) {
+            throw new Error('Filmler getirilemedi');
+          }
+          const data = await response.json();
+          setMovies(data);
+          setSeries([]);
+        } else if (contentType === 'series') {
+          const response = await fetch('/api/series');
+          if (!response.ok) {
+            throw new Error('Diziler getirilemedi');
+          }
+          const data = await response.json();
+          setSeries(data);
+          setMovies([]);
+        } else {
+          const [moviesResponse, seriesResponse] = await Promise.all([
+            fetch('/api/movies'),
+            fetch('/api/series'),
+          ]);
+
+          if (!moviesResponse.ok || !seriesResponse.ok) {
+            throw new Error('İçerikler getirilemedi');
+          }
+
+          const moviesData = await moviesResponse.json();
+          const seriesData = await seriesResponse.json();
+          setMovies(moviesData);
+          setSeries(seriesData);
+        }
       }
-      const data = await response.json();
-      setMovies(data);
     } catch (err) {
       setError(err.message || 'Sunucu hatası');
     } finally {
@@ -84,16 +132,17 @@ const MovieList = ({ token, username }) => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setLoading(true);
-      fetchMovies(searchQuery);
+      fetchContent(searchQuery);
     }, 250);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, contentType]);
 
   useEffect(() => {
-    fetchMovies(searchQuery);
-  }, []);
+    if (!searchQuery) {
+      fetchContent();
+    }
+  }, [contentType]);
 
   useEffect(() => {
     if (token && username) {
@@ -167,59 +216,87 @@ const MovieList = ({ token, username }) => {
 
   const isInWatchlist = (movieId) => watchlistIds.has(movieId);
 
+  const renderCard = (movie) => (
+    <article key={movie.id} className="movie-card">
+      <div className="movie-card__top">
+        <h3>{movie.title}</h3>
+        <span className="movie-type-badge">{getContentTypeLabel(movie)}</span>
+      </div>
+      <p className="movie-meta">{movie.genre} · {movie.releaseYear}</p>
+      <p>{movie.description}</p>
+      {token ? (
+        <div className="movie-actions">
+          <button
+            type="button"
+            className={`btn btn-secondary ${isFavorite(movie.id) ? 'active' : ''}`}
+            onClick={() => handleToggleFavorite(movie.id, !isFavorite(movie.id))}
+          >
+            {isFavorite(movie.id) ? '♥ Favorilerden Çıkar' : '♡ Favorilere Ekle'}
+          </button>
+          <button
+            type="button"
+            className={`btn btn-outline ${isInWatchlist(movie.id) ? 'active' : ''}`}
+            onClick={() => handleToggleWatchlist(movie.id, !isInWatchlist(movie.id))}
+          >
+            {isInWatchlist(movie.id) ? '− İzleme Listesinden Çıkar' : '+ İzleme Listesine Ekle'}
+          </button>
+        </div>
+      ) : (
+        <p className="movie-note">Favorilere ve izleme listesine eklemek için giriş yapın.</p>
+      )}
+      <ReviewSection contentId={movie.id} token={token} username={username} />
+    </article>
+  );
+
+  const renderSection = (title, items) => (
+    <section className="content-section">
+      <div className="movie-list__toolbar">
+        <h2>{title}</h2>
+      </div>
+      {items.length === 0 ? (
+        <p>{title} bulunamadı.</p>
+      ) : (
+        <div className="movie-grid">
+          {items.map((movie) => renderCard(movie))}
+        </div>
+      )}
+    </section>
+  );
+
   if (loading) {
-    return <div className="movie-list">Filmler yükleniyor...</div>;
+    return <div className="movie-list">Yükleniyor...</div>;
   }
 
   if (error) {
     return <div className="movie-list movie-error">{error}</div>;
   }
 
-  return (
-    <section className="movie-list">
+  const renderSearchResults = () => (
+    <section className="content-section">
       <div className="movie-list__toolbar">
-        <h2>Filmler</h2>
-        <input
-          type="search"
-          className="movie-list__search"
-          placeholder="Film başlığına göre ara..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <h2>{`"${searchQuery}" için arama sonuçları`}</h2>
       </div>
-      {movies.length === 0 ? (
-        <p>Henüz film yok.</p>
+      {searchResults?.length === 0 ? (
+        <p>{`"${searchQuery}" için sonuç bulunamadı.`}</p>
       ) : (
         <div className="movie-grid">
-          {movies.map((movie) => (
-            <article key={movie.id} className="movie-card">
-              <h3>{movie.title}</h3>
-              <p className="movie-meta">{movie.genre} · {movie.releaseYear}</p>
-              <p>{movie.description}</p>
-              {token ? (
-                <div className="movie-actions">
-                  <button
-                    type="button"
-                    className={`btn btn-secondary ${isFavorite(movie.id) ? 'active' : ''}`}
-                    onClick={() => handleToggleFavorite(movie.id, !isFavorite(movie.id))}
-                  >
-                    {isFavorite(movie.id) ? '♥ Favorilerden Çıkar' : '♡ Favorilere Ekle'}
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn btn-outline ${isInWatchlist(movie.id) ? 'active' : ''}`}
-                    onClick={() => handleToggleWatchlist(movie.id, !isInWatchlist(movie.id))}
-                  >
-                    {isInWatchlist(movie.id) ? '− İzleme Listesinden Çıkar' : '+ İzleme Listesine Ekle'}
-                  </button>
-                </div>
-              ) : (
-                <p className="movie-note">Favorilere ve izlemlisteye eklemek için giriş yapın.</p>
-              )}
-            </article>
-          ))}
+          {searchResults.map((movie) => renderCard(movie))}
         </div>
       )}
+    </section>
+  );
+
+  return (
+    <section className="movie-list">
+      {searchResults ? (
+        renderSearchResults()
+      ) : (
+        <>
+          {contentType !== 'series' && renderSection('Filmler', movies)}
+          {contentType !== 'movies' && renderSection('Diziler', series)}
+        </>
+      )}
+
       {token && (
         <section className="favorite-list">
           <h2>Favori Filmleriniz</h2>
@@ -227,20 +304,7 @@ const MovieList = ({ token, username }) => {
             <p>Henüz favori eklemediniz.</p>
           ) : (
             <div className="movie-grid">
-              {favoriteMovies.map((movie) => (
-                <article key={movie.id} className="movie-card">
-                  <h3>{movie.title}</h3>
-                  <p className="movie-meta">{movie.genre} · {movie.releaseYear}</p>
-                  <p>{movie.description}</p>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => handleToggleFavorite(movie.id, false)}
-                  >
-                    ♥ Favorilerden Çıkar
-                  </button>
-                </article>
-              ))}
+              {favoriteMovies.map((movie) => renderCard(movie))}
             </div>
           )}
         </section>
@@ -252,29 +316,7 @@ const MovieList = ({ token, username }) => {
             <p>Henüz izleme listesine eklemediniz.</p>
           ) : (
             <div className="movie-grid">
-              {watchlistMovies.map((movie) => (
-                <article key={movie.id} className="movie-card">
-                  <h3>{movie.title}</h3>
-                  <p className="movie-meta">{movie.genre} · {movie.releaseYear}</p>
-                  <p>{movie.description}</p>
-                  <div className="movie-actions">
-                    <button
-                      type="button"
-                      className={`btn btn-secondary ${isFavorite(movie.id) ? 'active' : ''}`}
-                      onClick={() => handleToggleFavorite(movie.id, !isFavorite(movie.id))}
-                    >
-                      {isFavorite(movie.id) ? '♥ Favorilerden Çıkar' : '♡ Favorilere Ekle'}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline"
-                      onClick={() => handleToggleWatchlist(movie.id, false)}
-                    >
-                      − İzleme Listesinden Çıkar
-                    </button>
-                  </div>
-                </article>
-              ))}
+              {watchlistMovies.map((movie) => renderCard(movie))}
             </div>
           )}
         </section>

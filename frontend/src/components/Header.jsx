@@ -1,7 +1,7 @@
 import React from 'react';
 import './Header.css';
 
-const Header = ({ onLoginClick, onHomeClick, onAdminClick, onAccountClick, onFavoritesClick, onLogout, isLoggedIn, username, role }) => {
+const Header = ({ onLoginClick, onHomeClick, onSeriesClick, onMoviesClick, onAdminClick, onAccountClick, onFavoritesClick, onLogout, isLoggedIn, username, role, searchQuery, onSearchChange }) => {
   return (
     <header className="main-header">
       <a
@@ -14,15 +14,26 @@ const Header = ({ onLoginClick, onHomeClick, onAdminClick, onAccountClick, onFav
       >
         MovieApp
       </a>
+      <div className="header-search">
+        <input
+          type="search"
+          className="header-search__input"
+          placeholder="Film veya dizi ara..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+      </div>
       <nav className="main-nav">
         <ul className="main-nav__items">
           <li className="main-nav__item">
-            <a href="#" onClick={(event) => { event.preventDefault(); onHomeClick(); }}>
+            <a href="#" onClick={(event) => { event.preventDefault(); onMoviesClick(); }}>
               Filmler
             </a>
           </li>
           <li className="main-nav__item">
-            <a href="#">Diziler</a>
+            <a href="#" onClick={(event) => { event.preventDefault(); onSeriesClick(); }}>
+              Diziler
+            </a>
           </li>
           {role === 'ADMIN' && (
             <li className="main-nav__item">
@@ -40,7 +51,7 @@ const Header = ({ onLoginClick, onHomeClick, onAdminClick, onAccountClick, onFav
                   onClick={onFavoritesClick}
                   title="Favoriler"
                 >
-                  <span className="heart-icon">♥</span>
+                  <span className="header-heart-icon">♥</span>
                 </button>
                 <button type="button" className="btn btn-account" onClick={onAccountClick}>
                   Hesabım
