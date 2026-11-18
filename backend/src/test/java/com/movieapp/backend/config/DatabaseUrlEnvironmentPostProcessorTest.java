@@ -6,6 +6,7 @@ import org.springframework.mock.env.MockEnvironment;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class DatabaseUrlEnvironmentPostProcessorTest {
 
@@ -39,6 +40,26 @@ class DatabaseUrlEnvironmentPostProcessorTest {
         processor.postProcessEnvironment(env, null);
 
         assertThat(env.getProperty("spring.datasource.url")).startsWith("jdbc:postgresql://direct.neon.tech/db");
+    }
+
+    @Test
+    void tirnakli_ve_bosluklu_adres_temizlenir() {
+        Map<String, Object> p = DatabaseUrlEnvironmentPostProcessor.toSpringProperties(
+                "  \"postgresql://u:p@ep-x.neon.tech/db?sslmode=require\"\n");
+        assertThat(p.get("spring.datasource.url")).isEqualTo("jdbc:postgresql://ep-x.neon.tech/db?sslmode=require");
+
+        Map<String, Object> single = DatabaseUrlEnvironmentPostProcessor.toSpringProperties("'postgresql://u:p@h.neon.tech/db'");
+        assertThat(single.get("spring.datasource.username")).isEqualTo("u");
+    }
+
+    @Test
+    void bozuk_adreste_hata_mesajinda_sifre_gorunmez() {
+        assertThatThrownBy(() -> DatabaseUrlEnvironmentPostProcessor.toSpringProperties(
+                "postgresql://kullanici:GizliSifre123@sunucu .neon.tech/db"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .message()
+                .doesNotContain("GizliSifre123")
+                .doesNotContain("kullanici");
     }
 
     @Test

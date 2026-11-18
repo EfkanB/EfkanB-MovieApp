@@ -7,6 +7,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -39,15 +40,26 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
         if (!hasText(raw)) {
             return;
         }
-        environment.getPropertySources().addFirst(new MapPropertySource(SOURCE_NAME, toSpringProperties(raw.trim())));
+        environment.getPropertySources().addFirst(new MapPropertySource(SOURCE_NAME, toSpringProperties(raw)));
     }
 
     /** postgres(ql)://user:pass@host[:port]/db?params → spring.datasource.url/username/password */
     static Map<String, Object> toSpringProperties(String databaseUrl) {
-        URI uri = URI.create(databaseUrl);
+        String cleaned = stripQuotes(databaseUrl);
+        URI uri;
+        try {
+            uri = new URI(cleaned);
+        } catch (URISyntaxException e) {
+            // Mesaja adresi KOYMA: içinde veritabanı şifresi var ve loglara düşer
+            throw new IllegalArgumentException(
+                    "DATABASE_URL okunamadı (konum " + e.getIndex() + "). Adresi tırnaksız ve boşluksuz gir.");
+        }
         String scheme = uri.getScheme();
         if (!"postgres".equals(scheme) && !"postgresql".equals(scheme)) {
             throw new IllegalArgumentException("DATABASE_URL postgres:// ya da postgresql:// ile başlamalı");
+        }
+        if (uri.getHost() == null) {
+            throw new IllegalArgumentException("DATABASE_URL içinde sunucu adı bulunamadı");
         }
 
         String host = uri.getHost();
@@ -85,6 +97,22 @@ public class DatabaseUrlEnvironmentPostProcessor implements EnvironmentPostProce
             }
         }
         return props;
+    }
+
+    /** Panelden kopyalarken gelen boşluk ve tırnakları temizle: "postgresql://..." → postgresql://... */
+    static String stripQuotes(String value) {
+        String v = value.trim();
+        while (v.length() >= 2
+                && ((v.startsWith("\"") && v.endsWith("\"")) || (v.startsWith("'") && v.endsWith("'")))) {
+            v = v.substring(1, v.length() - 1).trim();
+        }
+        if (v.startsWith("\"") || v.startsWith("'")) {
+            v = v.substring(1).trim();
+        }
+        if (v.endsWith("\"") || v.endsWith("'")) {
+            v = v.substring(0, v.length() - 1).trim();
+        }
+        return v;
     }
 
     private static String decode(String value) {
