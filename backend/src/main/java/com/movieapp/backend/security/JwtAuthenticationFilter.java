@@ -1,5 +1,6 @@
 package com.movieapp.backend.security;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.movieapp.backend.model.Role;
 import com.movieapp.backend.model.User;
 import com.movieapp.backend.repository.UserRepository;
@@ -40,10 +41,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
-            if (jwtUtil.validateToken(token)) {
-                String username = jwtUtil.getUsernameFromToken(token);
+            DecodedJWT jwt = jwtUtil.decode(token);
+            if (jwt != null) {
+                String username = jwt.getSubject();
+                Integer tokenVersion = jwt.getClaim(JwtUtil.VERSION_CLAIM).asInt();
 
-                userRepository.findByUsername(username).ifPresent(user -> {
+                userRepository.findByUsername(username)
+                        // Şifre değiştiyse eski token'lar artık kabul edilmez
+                        .filter(user -> tokenVersion != null && tokenVersion == user.getTokenVersion())
+                        .ifPresent(user -> {
                     GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + mapRole(user.getRole()));
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             user.getUsername(),

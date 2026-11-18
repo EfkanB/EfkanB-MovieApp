@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import AuthForm from './components/AuthForm';
 import Showcase from './components/Showcase';
@@ -21,25 +21,13 @@ import { attachOpenAuthListener } from './components/openAuthListener';
 function App() {
   const [view, setView] = useState('home');
   const [showAuth, setShowAuth] = useState(false);
-  const [token, setToken] = useState(null);
-  const [username, setUsername] = useState(null);
-  const [role, setRole] = useState(null);
+  // Giriş bilgileri sayfa açılırken localStorage'dan okunur
+  const [token, setToken] = useState(() => localStorage.getItem('authToken'));
+  const [username, setUsername] = useState(() => localStorage.getItem('username'));
+  const [role, setRole] = useState(() => localStorage.getItem('role'));
   const [accountSection, setAccountSection] = useState('details');
   const [searchQuery, setSearchQuery] = useState('');
   const [contentType, setContentType] = useState('all'); // 'all', 'movies', 'series'
-
-  // Sayfa yüklendiğinde localStorage'dan giriş bilgilerini yükle
-  useEffect(() => {
-    const savedToken = localStorage.getItem('authToken');
-    const savedUsername = localStorage.getItem('username');
-    const savedRole = localStorage.getItem('role');
-
-    if (savedToken && savedUsername) {
-      setToken(savedToken);
-      setUsername(savedUsername);
-      setRole(savedRole);
-    }
-  }, []);
 
   const handleLoginClick = () => {
     setShowAuth(true);
@@ -149,14 +137,14 @@ function App() {
         ) : showAuth ? (
           <AuthForm onClose={handleCloseAuth} onAuthSuccess={handleAuthSuccess} />
         ) : view === 'account' ? (
-          <AccountPanel token={token} username={username} initialSection={accountSection} />
+          <AccountPanel key={accountSection} token={token} username={username} initialSection={accountSection} />
         ) : view === 'admin' ? (
           <AdminDashboard token={token} />
 
         ) : (
           <>
             <Showcase />
-            <MovieList token={token} username={username} searchQuery={searchQuery} contentType={contentType} />
+            <MovieList key={username || 'misafir'} token={token} username={username} role={role} searchQuery={searchQuery} contentType={contentType} />
             <HowItWorks />
             <Features />
             <Plans />

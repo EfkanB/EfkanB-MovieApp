@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import StarRating from './StarRating';
 import './ReviewSection.css';
 
-const ReviewSection = ({ contentId, token, username }) => {
+const getJson = async (url, errorMessage) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(errorMessage);
+  }
+  return response.json();
+};
+
+const ReviewSection = ({ contentId, token, username, isAdmin = false }) => {
   const [reviews, setReviews] = useState([]);
   const [showReviews, setShowReviews] = useState(false);
   const [newRating, setNewRating] = useState(0);
@@ -21,27 +29,9 @@ const ReviewSection = ({ contentId, token, username }) => {
     return headers;
   };
 
-  const fetchReviews = async () => {
-    try {
-      const response = await fetch(`/api/reviews/content/${contentId}`);
-      if (!response.ok) {
-        throw new Error('Yorumlar yüklenemedi');
-      }
-      const data = await response.json();
-      setReviews(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   const fetchStats = async () => {
     try {
-      const response = await fetch(`/api/reviews/stats/${contentId}`);
-      if (!response.ok) {
-        throw new Error('İstatistikler yüklenemedi');
-      }
-      const data = await response.json();
-      setStats(data);
+      setStats(await getJson(`/api/reviews/stats/${contentId}`, 'İstatistikler yüklenemedi'));
     } catch (err) {
       console.error('Stats fetch error:', err);
     }
@@ -84,7 +74,7 @@ const ReviewSection = ({ contentId, token, username }) => {
       const newReview = await response.json();
       setReviews(prev => {
         // Check if this is an update or new review
-        const existingIndex = prev.findIndex(r => r.user.username === username);
+        const existingIndex = prev.findIndex(r => r.username === username);
         if (existingIndex >= 0) {
           const updated = [...prev];
           updated[existingIndex] = newReview;
@@ -128,13 +118,30 @@ const ReviewSection = ({ contentId, token, username }) => {
   };
 
   useEffect(() => {
-    fetchStats();
+    let ignore = false;
+    getJson(`/api/reviews/stats/${contentId}`, 'İstatistikler yüklenemedi')
+      .then((data) => {
+        if (!ignore) setStats(data);
+      })
+      .catch((err) => console.error('Stats fetch error:', err));
+    return () => {
+      ignore = true;
+    };
   }, [contentId]);
 
   useEffect(() => {
-    if (showReviews) {
-      fetchReviews();
-    }
+    if (!showReviews) return undefined;
+    let ignore = false;
+    getJson(`/api/reviews/content/${contentId}`, 'Yorumlar yüklenemedi')
+      .then((data) => {
+        if (!ignore) setReviews(data);
+      })
+      .catch((err) => {
+        if (!ignore) setError(err.message);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [showReviews, contentId]);
 
   return (
@@ -186,13 +193,13 @@ const ReviewSection = ({ contentId, token, username }) => {
               reviews.map((review) => (
                 <div key={review.id} className="review-item">
                   <div className="review-header">
-                    <strong>{review.user.username}</strong>
+                    <strong>{review.username}</strong>
                     <StarRating rating={review.rating} readonly maxStars={5} />
                     <span className="review-rating-text">{review.rating}/5</span>
                     <span className="review-date">
                       {new Date(review.createdAt).toLocaleDateString('tr-TR')}
                     </span>
-                    {(username === review.user.username || /* admin check */ false) && (
+                    {(username === review.username || isAdmin) && (
                       <button
                         className="btn btn-small btn-danger"
                         onClick={() => handleDeleteReview(review.id)}

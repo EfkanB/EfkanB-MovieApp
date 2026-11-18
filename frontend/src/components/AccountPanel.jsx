@@ -1,73 +1,59 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './AccountPanel.css';
+
+const fetchList = async (token, path, errorMessage) => {
+  const response = await fetch(path, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(errorMessage);
+  }
+  return response.json();
+};
 
 const AccountPanel = ({ token, username, initialSection = 'details' }) => {
   const [favorites, setFavorites] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
   const [currentSection, setCurrentSection] = useState(initialSection);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(Boolean(token));
   const [error, setError] = useState('');
 
   const fetchFavorites = async () => {
-    if (!token) {
-      setFavorites([]);
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/users/me/favorites', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Favoriler getirilemedi');
-      }
-
-      const data = await response.json();
-      setFavorites(data);
-    } catch (err) {
-      setError(err.message || 'Favoriler yüklenemedi');
-    } finally {
-      setLoading(false);
-    }
+    setFavorites(await fetchList(token, '/api/users/me/favorites', 'Favoriler getirilemedi'));
+    setLoading(false);
   };
 
   const fetchWatchlist = async () => {
-    if (!token) {
-      setWatchlist([]);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/users/me/watchlist', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('İzleme listesi getirilemedi');
-      }
-
-      const data = await response.json();
-      setWatchlist(data);
-    } catch (err) {
-      setError(err.message || 'İzleme listesi yüklenemedi');
-    }
+    setWatchlist(await fetchList(token, '/api/users/me/watchlist', 'İzleme listesi getirilemedi'));
+    setLoading(false);
   };
 
+  // initialSection değişince bileşen App'te `key` ile yeniden kurulur, ayrı bir effect gerekmez
   useEffect(() => {
-    setCurrentSection(initialSection || 'details');
-  }, [initialSection]);
+    if (!token) return undefined;
+    let ignore = false;
 
-  useEffect(() => {
-    fetchFavorites();
-    fetchWatchlist();
+    Promise.all([
+      fetchList(token, '/api/users/me/favorites', 'Favoriler getirilemedi'),
+      fetchList(token, '/api/users/me/watchlist', 'İzleme listesi getirilemedi'),
+    ])
+      .then(([favoriteData, watchlistData]) => {
+        if (ignore) return;
+        setFavorites(favoriteData);
+        setWatchlist(watchlistData);
+      })
+      .catch((err) => {
+        if (!ignore) setError(err.message || 'Liste yüklenemedi');
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [token]);
 
   const handleRemoveFavorite = async (contentId) => {

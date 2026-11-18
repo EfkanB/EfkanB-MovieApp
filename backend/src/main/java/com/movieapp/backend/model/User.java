@@ -31,6 +31,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
+    // Şifre değişince artırılır; token'daki sürüm eşleşmezse eski oturumlar geçersiz olur
+    @JsonIgnore
+    private Integer tokenVersion = 0;
+
     // Artık sadece Movie değil, Content (Film+Dizi) ekleyebiliyoruz
     @JsonIgnore
     @ManyToMany
@@ -106,6 +110,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getTokenVersion() {
+        return tokenVersion == null ? 0 : tokenVersion;
+    }
+
+    public void incrementTokenVersion() {
+        this.tokenVersion = getTokenVersion() + 1;
     }
 
     public Role getRole() {

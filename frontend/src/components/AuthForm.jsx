@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './AuthForm.css';
 
 import ForgotPassword from './ForgotPassword';
@@ -49,7 +49,7 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
           setMessage('Bağlantı hatası veya yetkisiz işlem.');
         }
       }
-    } catch (error) {
+    } catch {
       setMessage('Sunucuya bağlanılamadı. Backend çalışıyor mu?');
     }
   };
