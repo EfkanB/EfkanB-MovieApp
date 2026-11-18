@@ -6,18 +6,31 @@
 
 MovieApp is a modern, end-to-end content management platform where users can discover, rate, and manage movies and TV series. The project is built following **Layered Architecture** and **Object-Oriented Programming (OOP)** principles, ensuring industrial standards for code quality, scalability, and maintainability.
 
-##  Key Features
+## Key Features
 
-*   **Advanced Data Modeling (Polymorphism):** Implementation of **JPA Joined Inheritance** for `Movie` and `Series` entities inherited from a base `Content` class.
-*   **Secure Authentication:** Robust sign-up and login flow integrated with **Spring Security** and **JWT (JSON Web Token)**.
-*   **Dual List Management:** Users can independently manage their **Favorites** and **Watchlist**.
-*   **Review & Rating System:** Users rate content with 1–5 stars and leave comments; averages are shown on a 10-point scale.
-*   **Dynamic Search:** Real-time search functionality filtered by title using optimized backend queries.
-*   **Role-Based Access Control (RBAC):** Distinction between `USER` and `ADMIN` roles, featuring a restricted Admin Panel for content creation and management.
-*   **Automatic Seed Data:** Built-in initializer to populate the database with popular titles upon application startup.
-*   **Security:** BCrypt password hashing, JWT with server-side session revocation on password change, per-IP rate limiting on auth endpoints, strict CORS and Content-Security-Policy headers, and integration tests covering the main attack paths.
+**For users**
+*   **Discover:** Browse movies and TV series as poster cards with genre, year, runtime / season count and community rating; filter by *Movies* or *Series*.
+*   **Live search:** Search by title as you type (debounced, out-of-order responses ignored).
+*   **Favorites & Watchlist:** Add or remove titles with one tap on the poster; manage both lists from the *My Account* page.
+*   **Ratings & reviews:** Rate titles with 1–5 stars and write comments; averages are shown on a 10-point scale. Users can delete their own reviews.
+*   **Accounts:** Sign up and log in with JWT; a **welcome email** is sent after registration.
+*   **Password reset by email:** One-time, 15-minute reset link; the response never reveals whether an email is registered.
+*   **Responsive design:** Custom design system (cream / coral / navy, Instrument Serif + Figtree) that works on phone, tablet and desktop, with skeleton loading, empty and error states, keyboard focus styles and accessible star rating.
+*   **Privacy page:** Explains what data is stored and why (KVKK), plus TMDB attribution.
 
-##  Tech Stack
+**For admins**
+*   **Content dashboard:** Add, edit and delete movies and series from a table + form admin panel.
+*   **Moderation:** Admins can delete any review.
+*   **Role-based access:** `USER` / `ADMIN` roles enforced on the server with Spring Security (`@PreAuthorize`).
+
+**Under the hood**
+*   **Polymorphic data model:** JPA *Joined Inheritance* for `Movie` and `Series`, both extending a base `Content` entity.
+*   **Security:** BCrypt password hashing, JWT with session revocation on password change, per-IP rate limiting on login / register / password reset, strict CORS, Content-Security-Policy and HSTS headers, generic error responses that never leak internals.
+*   **Tests:** 20 backend tests (integration tests for the main attack paths + unit tests), run on an in-memory database.
+*   **Automatic seed data:** Popular titles are inserted on first start.
+*   **One-image deployment:** The React build is served by the Spring Boot jar from a single Docker image.
+
+## Tech Stack
 
 *   **Backend:** Java 17, Spring Boot 3, Spring Security, JWT, Spring Data JPA, Hibernate
 *   **Frontend:** React, Vite, CSS (responsive, custom design system), Lucide icons
@@ -27,7 +40,7 @@ MovieApp is a modern, end-to-end content management platform where users can dis
 
 ---
 
-## Setup Instructions (How to Run)
+## How to Run Locally
 
 ### 1. Database
 Create the database and a user in your local MySQL instance:
@@ -46,7 +59,7 @@ Copy `.env.example` and fill in the values (see the comments in the file):
 |----------|----------|-------------|
 | `DB_PASSWORD` | yes | MySQL password |
 | `JWT_SECRET` | yes (production) | At least 32 random characters: `openssl rand -base64 48`. If missing, a temporary key is generated and everyone is logged out on restart. |
-| `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | for password reset | Gmail address and an App Password |
+| `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | for emails | Gmail address and an App Password (or set `BREVO_API_KEY` to send through Brevo) |
 | `CORS_ALLOWED_ORIGINS` | production | Frontend URL, e.g. `https://example.com` |
 | `FRONTEND_RESET_PASSWORD_URL` | production | e.g. `https://example.com/reset-password` |
 
@@ -76,7 +89,7 @@ UPDATE users SET role = 'ADMIN' WHERE username = 'your-username';
 ## Tests
 
 ```bash
-cd backend && mvn test     # 18 tests on an in-memory H2 database (no MySQL needed)
+cd backend && mvn test     # 20 tests on an in-memory H2 database (no MySQL needed)
 cd frontend && npm run lint
 ```
 
