@@ -1,0 +1,32 @@
+# Render Blueprint: Render panelinde "New > Blueprint" ile bu repo seçilince servis otomatik kurulur.
+# "sync: false" olan değerleri Render kurulum sırasında senden ister; bunları buraya YAZMA.
+services:
+  - type: web
+    name: movieapp
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/contents
+    autoDeploy: true
+    envVars:
+      # Oturum anahtarı: Render rastgele ve güçlü bir değer üretir
+      - key: JWT_SECRET
+        generateValue: true
+      # Neon veritabanı (Neon panelindeki bağlantı bilgilerinden)
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # Brevo (şifre sıfırlama maili)
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      # Sitenin adresi, örn. https://movieapp.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: FRONTEND_RESET_PASSWORD_URL
+        sync: false

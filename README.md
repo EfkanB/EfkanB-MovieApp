@@ -76,8 +76,9 @@ cd frontend && npm run lint
 
 ## Deployment
 
-1. `cd frontend && npm run build` and copy `frontend/dist` to the web server.
-2. Build the backend with `cd backend && mvn package` and run `java -jar target/backend-0.0.1-SNAPSHOT.jar` with the environment variables above. Keep port 8080 closed to the internet.
-3. Put Nginx in front of both — see [`deploy/nginx.conf`](deploy/nginx.conf). It forwards `/api` to the backend and serves `index.html` for routes like `/reset-password`. Enable HTTPS (e.g. `certbot --nginx`).
+**Free hosting (Render + Neon + Brevo):** step-by-step guide in Turkish: [`DEPLOY.md`](DEPLOY.md).
+The [`Dockerfile`](Dockerfile) builds the frontend and serves it from the Spring Boot jar, so the whole app is a single service; [`render.yaml`](render.yaml) sets it up on Render.
+
+**Own server:** build the image with `docker build -t movieapp .`, or run Nginx in front of the jar — see [`deploy/nginx.conf`](deploy/nginx.conf). Enable HTTPS (e.g. `certbot --nginx`).
 
 Login, registration and password reset are rate limited per IP. Changing a password logs out all existing sessions.

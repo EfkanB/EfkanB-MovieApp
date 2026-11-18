@@ -6,6 +6,7 @@ import MovieList from './components/MovieList';
 import AccountPanel from './components/AccountPanel';
 import AdminDashboard from './components/AdminDashboard';
 import ResetPassword from './components/ResetPassword';
+import Privacy from './components/Privacy';
 
 
 import HowItWorks from './components/HowItWorks';
@@ -150,6 +151,8 @@ function App() {
       <main>
         {window.location.pathname === '/reset-password' ? (
           <ResetPassword />
+        ) : window.location.pathname === '/gizlilik' ? (
+          <Privacy />
         ) : showAuth ? (
           <AuthForm onClose={handleCloseAuth} onAuthSuccess={handleAuthSuccess} />
         ) : view === 'account' ? (

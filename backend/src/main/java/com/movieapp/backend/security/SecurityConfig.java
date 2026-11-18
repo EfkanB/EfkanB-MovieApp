@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -56,6 +57,22 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Tarayıcı güvenlik başlıkları: sadece kendi dosyalarımız ve TMDB afişleri yüklenebilir
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; "
+                                        + "img-src 'self' https://image.tmdb.org data:; "
+                                        + "style-src 'self' 'unsafe-inline'; "
+                                        + "script-src 'self'; "
+                                        + "font-src 'self'; "
+                                        + "connect-src 'self'; "
+                                        + "object-src 'none'; "
+                                        + "base-uri 'self'; "
+                                        + "form-action 'self'; "
+                                        + "frame-ancestors 'none'"))
+                        .referrerPolicy(rp -> rp.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        .httpStrictTransportSecurity(hsts -> hsts.maxAgeInSeconds(31536000).includeSubDomains(true))
+                )
                 .exceptionHandling(ex -> ex
                         // Giriş yapılmamışsa 401, giriş yapılmış ama yetki yoksa 403
                         .authenticationEntryPoint((req, res, e) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
@@ -75,6 +92,8 @@ public class SecurityConfig {
                                 "/api/reviews/stats/{contentId}"
                         ).permitAll()
                         .requestMatchers("/error").permitAll()
+                        // Frontend dosyaları (index.html, js, css, resimler) ve sayfa yolları herkese açık
+                        .requestMatchers(request -> !request.getRequestURI().startsWith("/api/")).permitAll()
                         .anyRequest().authenticated()
                 );
 

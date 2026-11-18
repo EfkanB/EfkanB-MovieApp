@@ -48,6 +48,11 @@
   font-weight: 700;
 }
 
+.plan__badge--soon {
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+
 .plan__price {
   font-family: var(--display);
   font-size: 64px;

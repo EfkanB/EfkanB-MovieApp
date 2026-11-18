@@ -55,13 +55,35 @@
   outline-color: var(--coral);
 }
 
-.site-footer__note {
+.site-footer__privacy {
   margin-left: auto;
+  color: var(--ink-on-dark-2);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.site-footer__privacy:hover {
+  color: var(--ink-on-dark);
+}
+
+.site-footer__note {
   font-size: 14px;
 }
 
+.site-footer__credit {
+  flex-basis: 100%;
+  padding-top: 16px;
+  border-top: 1px solid rgba(247, 239, 231, 0.12);
+  font-size: 13px;
+  color: var(--ink-on-dark-2);
+}
+
+.site-footer__credit a {
+  color: var(--ink-on-dark);
+}
+
 @media (max-width: 640px) {
-  .site-footer__note {
+  .site-footer__privacy {
     margin-left: 0;
   }
 }

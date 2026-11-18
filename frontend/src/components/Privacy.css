@@ -1,0 +1,43 @@
+.privacy {
+  max-width: calc(68ch + 2 * var(--page-pad));
+  padding-top: 56px;
+  padding-bottom: 80px;
+}
+
+.privacy h1 {
+  font-size: clamp(40px, 6vw, 64px);
+}
+
+.privacy__lead {
+  margin-top: 16px;
+  font-size: 18px;
+  color: var(--ink-2);
+}
+
+.privacy h2 {
+  margin-top: 40px;
+  margin-bottom: 12px;
+  font-size: 28px;
+}
+
+.privacy p,
+.privacy li {
+  color: var(--ink-2);
+  line-height: 1.65;
+}
+
+.privacy ul {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.privacy strong {
+  color: var(--ink);
+}
+
+.privacy__back {
+  margin-top: 40px;
+}
