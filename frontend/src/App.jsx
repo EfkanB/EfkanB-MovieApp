@@ -5,6 +5,7 @@ import Showcase from './components/Showcase';
 import MovieList from './components/MovieList';
 import AccountPanel from './components/AccountPanel';
 import AdminDashboard from './components/AdminDashboard';
+import ResetPassword from './components/ResetPassword';
 
 
 import HowItWorks from './components/HowItWorks';
@@ -143,7 +144,9 @@ function App() {
         onSearchChange={setSearchQuery}
       />
       <main>
-        {showAuth ? (
+        {window.location.pathname === '/reset-password' ? (
+          <ResetPassword />
+        ) : showAuth ? (
           <AuthForm onClose={handleCloseAuth} onAuthSuccess={handleAuthSuccess} />
         ) : view === 'account' ? (
           <AccountPanel token={token} username={username} initialSection={accountSection} />

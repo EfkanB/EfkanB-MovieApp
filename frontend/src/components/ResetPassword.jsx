@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState } from 'react';
 
 const ResetPassword = () => {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') || '';
+  const token = new URLSearchParams(window.location.search).get('token') || '';
 
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +25,8 @@ const ResetPassword = () => {
       }
 
       window.alert(data?.message || 'Şifre başarıyla sıfırlandı');
-      window.location.reload();
+      // Token adres çubuğunda kalmasın; ana sayfaya dön
+      window.location.replace('/');
     } catch (err) {
       setMessage(err.message || 'Sunucu hatası');
     } finally {
@@ -47,6 +46,8 @@ const ResetPassword = () => {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              minLength={8}
+              autoComplete="new-password"
               required
             />
           </label>

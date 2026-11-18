@@ -21,6 +21,7 @@ public class AdminContentService {
     // ---------------------- MOVIES ----------------------
     public Movie createMovie(Movie movie) {
         validateMovie(movie);
+        movie.setId(null); // yeni kayıt: mevcut bir içeriğin üzerine yazılmasın
         return (Movie) contentRepository.save(movie);
     }
 
@@ -61,6 +62,7 @@ public class AdminContentService {
     // ---------------------- SERIES ----------------------
     public Series createSeries(Series series) {
         validateSeries(series);
+        series.setId(null);
         return (Series) contentRepository.save(series);
     }
 

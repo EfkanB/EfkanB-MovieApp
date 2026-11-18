@@ -21,7 +21,6 @@ const AccountPanel = ({ token, username, initialSection = 'details' }) => {
       const response = await fetch('/api/users/me/favorites', {
         headers: {
           Authorization: `Bearer ${token}`,
-          'X-Username': username,
         },
       });
 
@@ -48,7 +47,6 @@ const AccountPanel = ({ token, username, initialSection = 'details' }) => {
       const response = await fetch('/api/users/me/watchlist', {
         headers: {
           Authorization: `Bearer ${token}`,
-          'X-Username': username,
         },
       });
 
@@ -85,7 +83,6 @@ const AccountPanel = ({ token, username, initialSection = 'details' }) => {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
-          'X-Username': username,
         },
       });
 
@@ -113,7 +110,6 @@ const AccountPanel = ({ token, username, initialSection = 'details' }) => {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
-          'X-Username': username,
         },
       });
 

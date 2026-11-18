@@ -4,29 +4,19 @@ import com.movieapp.backend.model.Content;
 import com.movieapp.backend.model.Movie;
 import com.movieapp.backend.model.Series;
 import com.movieapp.backend.repository.ContentRepository;
-import com.movieapp.backend.service.UserService;
-import com.movieapp.backend.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
 public class ContentController {
 
     @Autowired
     private ContentRepository contentRepository;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private JwtUtil jwtUtil;
 
     // Tüm içerikleri getir (filmler + diziler)
     @GetMapping("/contents")
@@ -87,64 +77,28 @@ public class ContentController {
         return ResponseEntity.ok(contents);
     }
 
-    private String extractUsername(HttpServletRequest request) {
-        String username = request.getHeader("X-Username");
-        if (username != null && !username.isBlank()) {
-            return username;
-        }
-
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            if (jwtUtil.validateToken(token)) {
-                return jwtUtil.getUsernameFromToken(token);
-            }
-        }
-
-        return null;
-    }
-
-    private ResponseEntity<String> requireAdmin(HttpServletRequest request) {
-        String username = extractUsername(request);
-        if (username == null || !userService.isAdmin(username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Admin erişimi için geçerli bir ADMIN rolü gereklidir.");
-        }
-        return null;
-    }
-
     // Film ekleme (Admin için)
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/movies")
-    public ResponseEntity<Movie> addMovie(HttpServletRequest request, @RequestBody Movie movie) {
-        ResponseEntity<String> authCheck = requireAdmin(request);
-        if (authCheck != null) {
-            return ResponseEntity.status(authCheck.getStatusCode()).build();
-        }
-
+    public ResponseEntity<Movie> addMovie(@RequestBody Movie movie) {
+        movie.setId(null); // yeni kayıt: mevcut bir içeriğin üzerine yazılmasın
         Movie savedMovie = (Movie) contentRepository.save(movie);
         return ResponseEntity.ok(savedMovie);
     }
 
     // Dizi ekleme (Admin için)
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/series")
-    public ResponseEntity<Series> addSeries(HttpServletRequest request, @RequestBody Series series) {
-        ResponseEntity<String> authCheck = requireAdmin(request);
-        if (authCheck != null) {
-            return ResponseEntity.status(authCheck.getStatusCode()).build();
-        }
-
+    public ResponseEntity<Series> addSeries(@RequestBody Series series) {
+        series.setId(null);
         Series savedSeries = (Series) contentRepository.save(series);
         return ResponseEntity.ok(savedSeries);
     }
 
     // İçerik güncelleme (Admin için)
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/contents/{id}")
-    public ResponseEntity<Content> updateContent(HttpServletRequest request, @PathVariable Long id, @RequestBody Content content) {
-        ResponseEntity<String> authCheck = requireAdmin(request);
-        if (authCheck != null) {
-            return ResponseEntity.status(authCheck.getStatusCode()).build();
-        }
-
+    public ResponseEntity<Content> updateContent(@PathVariable Long id, @RequestBody Content content) {
         if (!contentRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -154,13 +108,9 @@ public class ContentController {
     }
 
     // İçerik silme (Admin için)
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/contents/{id}")
-    public ResponseEntity<Void> deleteContent(HttpServletRequest request, @PathVariable Long id) {
-        ResponseEntity<String> authCheck = requireAdmin(request);
-        if (authCheck != null) {
-            return ResponseEntity.status(authCheck.getStatusCode()).build();
-        }
-
+    public ResponseEntity<Void> deleteContent(@PathVariable Long id) {
         if (!contentRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
