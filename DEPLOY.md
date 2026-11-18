@@ -43,11 +43,11 @@ Tablolar uygulama ilk açıldığında otomatik oluşur, örnek filmler de eklen
    |---|---|
    | `DATABASE_URL` | Neon'dan (1. adım) |
    | `BREVO_API_KEY`, `MAIL_FROM` | Brevo'dan (2. adım) |
-   | `CORS_ALLOWED_ORIGINS` | Sitenin adresi, örn. `https://movieapp.onrender.com` |
-   | `FRONTEND_RESET_PASSWORD_URL` | Sitenin adresi + `/reset-password`, örn. `https://movieapp.onrender.com/reset-password` |
+   | `CORS_ALLOWED_ORIGINS` | Sitenin adresi, örn. `https://movieapp-ye06.onrender.com` |
+   | `FRONTEND_RESET_PASSWORD_URL` | Sitenin adresi + `/reset-password`, örn. `https://movieapp-ye06.onrender.com/reset-password` |
 
    `JWT_SECRET`'i Render kendisi rastgele üretir, dokunma.
-   Sitenin adresini ilk kurulumda bilmiyorsan servis adını `movieapp` bırak; adres büyük ihtimalle `https://movieapp.onrender.com` olur. Ad alınmışsa Render başka bir adres verir; o zaman **Environment** sekmesinden son iki değeri düzeltip **Save** de.
+   Sitenin adresini ilk kurulumda bilmiyorsan servis adını `movieapp` bırak; adres büyük ihtimalle `https://movieapp-ye06.onrender.com` olur. Ad alınmışsa Render başka bir adres verir; o zaman **Environment** sekmesinden son iki değeri düzeltip **Save** de.
 4. **Apply** → ilk derleme 5-10 dakika sürer. Bittiğinde adres panelde görünür.
 
 ## 4. Admin hesabı
