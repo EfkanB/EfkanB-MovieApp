@@ -1,3 +1,7 @@
+-- !!! UYARI: SADECE YEREL GELİŞTİRME İÇİN !!!
+-- Bu dosya şifresi 123456 olan bir ADMIN hesabı oluşturur.
+-- Yayındaki (production) veritabanında ASLA çalıştırma.
+
 -- MovieApp DB Seed (users) - email dahil
 -- Hem H2 hem MySQL uyumlu olacak şekilde genel SQL kullanıldı.
 -- Not: Spring Security tarafında şifreler BCrypt hash bekler.

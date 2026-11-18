@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const ResetPassword = () => {
   const token = new URLSearchParams(window.location.search).get('token') || '';

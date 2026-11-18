@@ -1,8 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReviewSection from './ReviewSection';
 import './MovieList.css';
 
-const MovieList = ({ token, username, searchQuery, contentType = 'all' }) => {
+const getJson = async (url, errorMessage, headers = {}) => {
+  const response = await fetch(url, { headers });
+  if (!response.ok) throw new Error(errorMessage);
+  return response.json();
+};
+
+// Arama varsa arama sonuçlarını, yoksa seçilen türdeki içerikleri getirir
+const loadContent = async (query, contentType) => {
+  if (query) {
+    const data = await getJson(`/api/content/search?title=${encodeURIComponent(query)}`, 'Arama sonuçları getirilemedi');
+    return { searchResults: data, movies: [], series: [] };
+  }
+  if (contentType === 'movies') {
+    return { searchResults: null, movies: await getJson('/api/movies', 'Filmler getirilemedi'), series: [] };
+  }
+  if (contentType === 'series') {
+    return { searchResults: null, movies: [], series: await getJson('/api/series', 'Diziler getirilemedi') };
+  }
+  const [movies, series] = await Promise.all([
+    getJson('/api/movies', 'İçerikler getirilemedi'),
+    getJson('/api/series', 'İçerikler getirilemedi'),
+  ]);
+  return { searchResults: null, movies, series };
+};
+
+const MovieList = ({ token, username, role, searchQuery, contentType = 'all' }) => {
   const [movies, setMovies] = useState([]);
   const [series, setSeries] = useState([]);
   const [searchResults, setSearchResults] = useState(null);
@@ -33,131 +58,55 @@ const MovieList = ({ token, username, searchQuery, contentType = 'all' }) => {
     return String(onTenScale).replace('.', ',');
   };
 
-  const fetchContent = async (query = '') => {
-    setError('');
-    setLoading(true);
-
-    try {
-      if (query) {
-        const response = await fetch(`/api/content/search?title=${encodeURIComponent(query)}`);
-        if (!response.ok) throw new Error('Arama sonuçları getirilemedi');
-        const data = await response.json();
-        setSearchResults(data);
-        setMovies([]);
-        setSeries([]);
-        return;
-      }
-
-      setSearchResults(null);
-
-      if (contentType === 'movies') {
-        const response = await fetch('/api/movies');
-        if (!response.ok) throw new Error('Filmler getirilemedi');
-        const data = await response.json();
-        setMovies(data);
-        setSeries([]);
-        return;
-      }
-
-      if (contentType === 'series') {
-        const response = await fetch('/api/series');
-        if (!response.ok) throw new Error('Diziler getirilemedi');
-        const data = await response.json();
-        setSeries(data);
-        setMovies([]);
-        return;
-      }
-
-      const [moviesResponse, seriesResponse] = await Promise.all([fetch('/api/movies'), fetch('/api/series')]);
-      if (!moviesResponse.ok || !seriesResponse.ok) throw new Error('İçerikler getirilemedi');
-
-      setMovies(await moviesResponse.json());
-      setSeries(await seriesResponse.json());
-    } catch (err) {
-      setError(err.message || 'Sunucu hatası');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchRatingStatsForList = async (contents) => {
-    if (!contents || contents.length === 0) return;
-
-    const uniqueIds = [...new Set(contents.map((c) => c.id))];
-
-    try {
-      const results = await Promise.all(
-        uniqueIds.map(async (contentId) => {
-          const response = await fetch(`/api/reviews/stats/${contentId}`);
-          if (!response.ok) return { contentId, averageRating: null };
-          const data = await response.json();
-          return { contentId, averageRating: data.averageRating };
-        })
-      );
-
-      const next = {};
-      for (const r of results) next[r.contentId] = r.averageRating;
-      setRatingStatsByContentId(next);
-    } catch {
-      // Sessizce devam
-    }
-  };
-
-  const fetchFavorites = async () => {
-    if (!token || !username) {
-      setFavoriteIds(new Set());
-      setFavoriteMovies([]);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/users/me/favorites', { headers: authHeaders() });
-      if (!response.ok) throw new Error('Favoriler getirilemedi');
-      const data = await response.json();
-      setFavoriteMovies(data);
-      setFavoriteIds(new Set(data.map((m) => m.id)));
-    } catch (err) {
-      setError(err.message || 'Favori bilgisi alınamadı');
-    }
-  };
-
-  const fetchWatchlist = async () => {
-    if (!token || !username) {
-      setWatchlistIds(new Set());
-      setWatchlistMovies([]);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/users/me/watchlist', { headers: authHeaders() });
-      if (!response.ok) throw new Error('İzleme listesi getirilemedi');
-      const data = await response.json();
-      setWatchlistMovies(data);
-      setWatchlistIds(new Set(data.map((m) => m.id)));
-    } catch (err) {
-      setError(err.message || 'İzleme listesi bilgisi alınamadı');
-    }
-  };
-
+  // Arama yazılırken her tuşta istek atmamak için 250 ms bekle; eski istek gelirse yok say
   useEffect(() => {
-    const timer = setTimeout(() => fetchContent(searchQuery), 250);
-    return () => clearTimeout(timer);
+    let ignore = false;
+    const timer = setTimeout(async () => {
+      setError('');
+      setLoading(true);
+      try {
+        const result = await loadContent(searchQuery, contentType);
+        if (ignore) return;
+        setSearchResults(result.searchResults);
+        setMovies(result.movies);
+        setSeries(result.series);
+      } catch (err) {
+        if (!ignore) setError(err.message || 'Sunucu hatası');
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }, searchQuery ? 250 : 0);
+
+    return () => {
+      ignore = true;
+      clearTimeout(timer);
+    };
   }, [searchQuery, contentType]);
 
+  // Giriş/çıkışta App bu bileşeni `key` ile yeniden kurar, listeleri sıfırlamaya gerek yok
   useEffect(() => {
-    if (!searchQuery) fetchContent();
-  }, [contentType]);
+    if (!token || !username) return undefined;
+    let ignore = false;
+    const headers = { Authorization: `Bearer ${token}` };
 
-  useEffect(() => {
-    if (token && username) {
-      fetchFavorites();
-      fetchWatchlist();
-    } else {
-      setFavoriteIds(new Set());
-      setWatchlistIds(new Set());
-      setFavoriteMovies([]);
-      setWatchlistMovies([]);
-    }
+    Promise.all([
+      getJson('/api/users/me/favorites', 'Favoriler getirilemedi', headers),
+      getJson('/api/users/me/watchlist', 'İzleme listesi getirilemedi', headers),
+    ])
+      .then(([favoriteData, watchlistData]) => {
+        if (ignore) return;
+        setFavoriteMovies(favoriteData);
+        setFavoriteIds(new Set(favoriteData.map((m) => m.id)));
+        setWatchlistMovies(watchlistData);
+        setWatchlistIds(new Set(watchlistData.map((m) => m.id)));
+      })
+      .catch((err) => {
+        if (!ignore) setError(err.message || 'Favori bilgisi alınamadı');
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [token, username]);
 
   const updateFavoriteIds = (movieList) => {
@@ -210,7 +159,7 @@ const MovieList = ({ token, username, searchQuery, contentType = 'all' }) => {
   const isInWatchlist = (movieId) => watchlistIds.has(movieId);
 
   useEffect(() => {
-    if (searchResults) return;
+    if (searchResults) return undefined;
 
     const list =
       contentType === 'movies'
@@ -218,9 +167,23 @@ const MovieList = ({ token, username, searchQuery, contentType = 'all' }) => {
         : contentType === 'series'
           ? series
           : [...movies, ...series];
+    const uniqueIds = [...new Set(list.map((c) => c.id))];
+    if (uniqueIds.length === 0) return undefined;
 
-    fetchRatingStatsForList(list);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let ignore = false;
+    Promise.all(
+      uniqueIds.map((contentId) =>
+        getJson(`/api/reviews/stats/${contentId}`, '')
+          .then((data) => [contentId, data.averageRating])
+          .catch(() => [contentId, null])
+      )
+    ).then((entries) => {
+      if (!ignore) setRatingStatsByContentId(Object.fromEntries(entries));
+    });
+
+    return () => {
+      ignore = true;
+    };
   }, [movies, series, contentType, searchResults]);
 
   const renderCard = (movie) => {
@@ -276,7 +239,7 @@ const MovieList = ({ token, username, searchQuery, contentType = 'all' }) => {
           </button>
         )}
 
-        <ReviewSection contentId={movie.id} token={token} username={username} />
+        <ReviewSection contentId={movie.id} token={token} username={username} isAdmin={role === 'ADMIN'} />
       </article>
     );
   };

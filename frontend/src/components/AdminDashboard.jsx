@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './AdminPanel.css';
 
 import { adminApi } from '../services/adminApi';
@@ -55,10 +55,19 @@ const AdminDashboard = ({ token }) => {
 
   useEffect(() => {
     // token yoksa admin erişimi denemesin
-    if (!token) return;
-    refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, token]);
+    if (!token) return undefined;
+    let ignore = false;
+    (mode === 'movies' ? api.listMovies() : api.listSeries())
+      .then((data) => {
+        if (!ignore) setList(Array.isArray(data) ? data : []);
+      })
+      .catch((e) => {
+        if (!ignore) setMessage(e.message);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [api, mode, token]);
 
   const startCreate = () => {
     setEditingId(null);

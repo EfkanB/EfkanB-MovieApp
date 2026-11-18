@@ -57,7 +57,7 @@ public class AuthController {
             AuthResponse response = new AuthResponse(
                     registeredUser.getUsername(),
                     registeredUser.getRole().name(),
-                    jwtUtil.generateToken(registeredUser.getUsername())
+                    jwtUtil.generateToken(registeredUser)
             );
 
             return ResponseEntity.ok(response);
@@ -79,7 +79,7 @@ public class AuthController {
             AuthResponse response = new AuthResponse(
                 user.getUsername(),
                 user.getRole().name(),
-                jwtUtil.generateToken(user.getUsername())
+                jwtUtil.generateToken(user)
             );
             
             return ResponseEntity.ok(response);

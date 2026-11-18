@@ -1,4 +1,3 @@
-import React from 'react';
 import './Header.css';
 
 const Header = ({ onLoginClick, onHomeClick, onSeriesClick, onMoviesClick, onAdminClick, onAccountClick, onFavoritesClick, onLogout, isLoggedIn, username, role, searchQuery, onSearchChange }) => {

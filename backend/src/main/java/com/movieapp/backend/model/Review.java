@@ -1,6 +1,7 @@
 package com.movieapp.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -40,6 +41,10 @@ public class Review {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    // API'de kullanıcının sadece adını göster (e-posta, şifre vb. asla dönmesin)
+    @JsonProperty(value = "username", access = JsonProperty.Access.READ_ONLY)
+    public String getUsername() { return user != null ? user.getUsername() : null; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

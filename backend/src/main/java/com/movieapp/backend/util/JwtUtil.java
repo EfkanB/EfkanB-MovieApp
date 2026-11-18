@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.movieapp.backend.model.User;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ public class JwtUtil {
     private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
     private static final String ISSUER = "movieapp";
     private static final int MIN_SECRET_LENGTH = 32;
+    public static final String VERSION_CLAIM = "ver";
 
     @Value("${jwt.secret:}")
     private String jwtSecret;
@@ -50,26 +52,22 @@ public class JwtUtil {
         verifier = JWT.require(algorithm).withIssuer(ISSUER).build();
     }
 
-    public String generateToken(String username) {
+    public String generateToken(User user) {
         return JWT.create()
                 .withIssuer(ISSUER)
-                .withSubject(username)
+                .withSubject(user.getUsername())
+                .withClaim(VERSION_CLAIM, user.getTokenVersion())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .sign(algorithm);
     }
 
-    public String getUsernameFromToken(String token) {
-        DecodedJWT decodedJWT = verifier.verify(token);
-        return decodedJWT.getSubject();
-    }
-
-    public boolean validateToken(String token) {
+    /** Token geçerliyse çözülmüş halini, değilse null döner. */
+    public DecodedJWT decode(String token) {
         try {
-            verifier.verify(token);
-            return true;
+            return verifier.verify(token);
         } catch (Exception ex) {
-            return false;
+            return null;
         }
     }
 }
