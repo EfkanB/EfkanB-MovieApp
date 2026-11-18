@@ -9,6 +9,7 @@ const ReviewSection = ({ contentId, token, username }) => {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [stats, setStats] = useState({ averageRating: null, reviewCount: 0 });
 
   const authHeaders = () => {
     const headers = {
@@ -36,6 +37,19 @@ const ReviewSection = ({ contentId, token, username }) => {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`/api/reviews/stats/${contentId}`);
+      if (!response.ok) {
+        throw new Error('İstatistikler yüklenemedi');
+      }
+      const data = await response.json();
+      setStats(data);
+    } catch (err) {
+      console.error('Stats fetch error:', err);
+    }
+  };
+
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!token || !username) {
@@ -43,7 +57,7 @@ const ReviewSection = ({ contentId, token, username }) => {
       return;
     }
     if (newRating === 0) {
-      setError('Lütfen bir puan verin');
+      setError('Lütfen bir puan verin (1-5 yıldız)');
       return;
     }
     if (!newComment.trim()) {
@@ -71,9 +85,20 @@ const ReviewSection = ({ contentId, token, username }) => {
       }
 
       const newReview = await response.json();
-      setReviews(prev => [newReview, ...prev]);
+      setReviews(prev => {
+        // Check if this is an update or new review
+        const existingIndex = prev.findIndex(r => r.user.username === username);
+        if (existingIndex >= 0) {
+          const updated = [...prev];
+          updated[existingIndex] = newReview;
+          return updated;
+        }
+        return [newReview, ...prev];
+      });
       setNewRating(0);
       setNewComment('');
+      // Refresh stats
+      await fetchStats();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -98,10 +123,16 @@ const ReviewSection = ({ contentId, token, username }) => {
       }
 
       setReviews(prev => prev.filter(review => review.id !== reviewId));
+      // Refresh stats
+      await fetchStats();
     } catch (err) {
       setError(err.message);
     }
   };
+
+  useEffect(() => {
+    fetchStats();
+  }, [contentId]);
 
   useEffect(() => {
     if (showReviews) {
@@ -109,37 +140,32 @@ const ReviewSection = ({ contentId, token, username }) => {
     }
   }, [showReviews, contentId]);
 
-  const averageRating = reviews.length > 0
-    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
-    : 0;
-
   return (
     <div className="review-section">
       <button
-        className="btn btn-outline review-toggle"
-        onClick={() => setShowReviews(!showReviews)}
+        type="button"
+        className="review-toggle-btn"
+        onClick={() => setShowReviews((prev) => !prev)}
       >
-        {showReviews ? 'Yorumları Gizle' : `Yorumları Göster (${reviews.length})`}
-        {reviews.length > 0 && (
-          <span className="average-rating">
-            Ortalama: <StarRating rating={Math.round(averageRating)} readonly maxStars={5} /> ({averageRating})
-          </span>
-        )}
+        {showReviews
+          ? 'Yorumları Gizle'
+          : `Yorumları Göster (${stats.reviewCount})`}
       </button>
 
       {showReviews && (
         <div className="review-content">
+
           {token && (
             <form className="review-form" onSubmit={handleSubmitReview}>
-              <h4>Yorum Yap</h4>
+              <h4>Puanla ve Yorum Yap</h4>
               <div className="rating-input">
-                <label>Puan:</label>
+                <label>Puanın:</label>
                 <StarRating
                   rating={newRating}
                   onRatingChange={setNewRating}
-                  maxStars={10}
+                  maxStars={5}
                 />
-                <span className="rating-text">{newRating}/10</span>
+                <span className="rating-text">{newRating}/5</span>
               </div>
               <textarea
                 placeholder="Yorumunuzu yazın..."
@@ -149,13 +175,14 @@ const ReviewSection = ({ contentId, token, username }) => {
                 required
               />
               <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Gönderiliyor...' : 'Yorum Gönder'}
+                {loading ? 'Gönderiliyor...' : 'Gönder'}
               </button>
+              {error && <p className="error-message">{error}</p>}
             </form>
           )}
 
           <div className="reviews-list">
-            <h4>Yorumlar ({reviews.length})</h4>
+            <h4>Tüm Yorumlar ({stats.reviewCount})</h4>
             {reviews.length === 0 ? (
               <p>Henüz yorum yok. İlk yorumu siz yapın!</p>
             ) : (
@@ -163,8 +190,8 @@ const ReviewSection = ({ contentId, token, username }) => {
                 <div key={review.id} className="review-item">
                   <div className="review-header">
                     <strong>{review.user.username}</strong>
-                    <StarRating rating={review.rating} readonly maxStars={10} />
-                    <span className="review-rating-text">{review.rating}/10</span>
+                    <StarRating rating={review.rating} readonly maxStars={5} />
+                    <span className="review-rating-text">{review.rating}/5</span>
                     <span className="review-date">
                       {new Date(review.createdAt).toLocaleDateString('tr-TR')}
                     </span>
@@ -182,8 +209,6 @@ const ReviewSection = ({ contentId, token, username }) => {
               ))
             )}
           </div>
-
-          {error && <p className="error-message">{error}</p>}
         </div>
       )}
     </div>

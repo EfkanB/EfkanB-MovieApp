@@ -38,6 +38,17 @@ public class ReviewController {
         }
     }
 
+    // Bir content'in puan istatistiklerini getir
+    @GetMapping("/stats/{contentId}")
+    public ResponseEntity<?> getRatingStats(@PathVariable Long contentId) {
+        try {
+            Map<String, Object> stats = reviewService.getRatingStats(contentId);
+            return ResponseEntity.ok(stats);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // Yeni yorum ekle
     @PostMapping
     public ResponseEntity<?> addReview(HttpServletRequest request,

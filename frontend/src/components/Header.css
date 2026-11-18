@@ -1,6 +1,6 @@
 .main-header {
   background-color: #FC997C;
-  padding: 12px 18px;
+  padding: 12px 28px;
   position: fixed;
   z-index: 100;
   width: 100%;
@@ -8,7 +8,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
+
+.main-header__left {
+  display: flex;
+  align-items: center;
+}
+
 
 .header-search {
   flex: 1;
@@ -51,8 +58,11 @@
   list-style: none;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 1rem;
 }
+
+
+
 
 .main-nav__item {
   display: inline-flex;
@@ -131,6 +141,28 @@
   padding: 10px 16px;
   cursor: pointer;
 }
+
+.btn-login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #FC997C;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-login:hover {
+  background: #2E4C6D;
+  color: #fff;
+  border-color: #2E4C6D;
+}
+
 
 .account-name {
   color: #fff;

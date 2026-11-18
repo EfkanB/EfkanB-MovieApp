@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import './AuthForm.css';
 
+import ForgotPassword from './ForgotPassword';
+
 const AuthForm = ({ onClose, onAuthSuccess }) => {
   const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleSubmit = async (event) => {
+
     event.preventDefault();
     const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
 
@@ -17,7 +22,12 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+            body: JSON.stringify({
+              username,
+              password,
+              ...(mode === 'register' ? { email } : {}),
+            }),
+
       });
 
       const data = await response.json();
@@ -44,6 +54,10 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
     }
   };
 
+  if (showForgot) {
+    return <ForgotPassword onClose={() => setShowForgot(false)} />;
+  }
+
   return (
     <section id="auth" className="auth-section">
       <div className="auth-card">
@@ -51,6 +65,7 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
           ×
         </button>
         <h2>{mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol'}</h2>
+
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
             Kullanıcı adı
@@ -61,6 +76,17 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
               required
             />
           </label>
+          {mode === 'register' && (
+            <label>
+              E-posta
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
+          )}
           <label>
             Şifre
             <input
@@ -70,6 +96,7 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
               required
             />
           </label>
+
           <button type="submit" className="btn btn-primary">
             {mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol'}
           </button>
@@ -80,6 +107,19 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
             {mode === 'login' ? 'Kayıt Ol' : 'Giriş Yap'}
           </button>
         </p>
+
+        {mode === 'login' && (
+          <p className="auth-toggle" style={{ marginTop: 12 }}>
+            <button
+              type="button"
+              onClick={() => setShowForgot(true)}
+              style={{ color: '#396eb0', fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer' }}
+            >
+              Şifremi Unuttum?
+            </button>
+          </p>
+        )}
+
         {/* React artık burada çökmeyecek çünkü message kesinlikle bir string */}
         {message && <p className="auth-message">{message}</p>}
       </div>

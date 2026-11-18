@@ -1,10 +1,28 @@
 .review-section {
-  margin-top: 10px;
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
-.review-toggle {
+.review-toggle-btn {
   width: 100%;
-  margin-bottom: 10px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid #fc997c;
+  border-radius: 8px;
+  background: transparent;
+  color: #fc997c;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.review-toggle-btn:hover {
+  background: #fc997c;
+  color: #fff;
 }
 
 .average-rating {
@@ -13,9 +31,9 @@
 }
 
 .review-content {
-  border-top: 1px solid #ddd;
   padding-top: 15px;
 }
+
 
 .review-form {
   margin-bottom: 20px;
@@ -66,6 +84,7 @@
 .review-item {
   border-bottom: 1px solid #eee;
   padding: 10px 0;
+  position: relative;
 }
 
 .review-item:last-child {
@@ -77,6 +96,9 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 5px;
+  flex-wrap: wrap;
+  position: relative;
+  padding-right: 80px;
 }
 
 .review-header strong {
@@ -92,6 +114,12 @@
   font-size: 12px;
   color: #999;
   margin-left: auto;
+}
+
+.review-header .btn-small {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .review-comment {

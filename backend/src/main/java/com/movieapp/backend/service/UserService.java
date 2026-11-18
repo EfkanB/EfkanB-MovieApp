@@ -17,7 +17,7 @@ import java.util.Set;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ContentRepository contentRepository; // Artık MovieRepository değil, ContentRepository kullanıyoruz
+    private final ContentRepository contentRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
@@ -30,6 +30,9 @@ public class UserService {
     public User register(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new RuntimeException("Username already exists");
+        }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new RuntimeException("Email already exists");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -57,7 +60,6 @@ public class UserService {
                 .orElse(false);
     }
 
-    // Artık Set<Movie> değil, Set<Content> dönüyor
     public Set<Content> getFavorites(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -70,6 +72,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new RuntimeException("Content not found"));
+
         user.getFavorites().add(content);
         return userRepository.save(user).getFavorites();
     }
@@ -80,6 +83,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new RuntimeException("Content not found"));
+
         user.getFavorites().remove(content);
         return userRepository.save(user).getFavorites();
     }
@@ -96,6 +100,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new RuntimeException("Content not found"));
+
         user.getWatchlist().add(content);
         return userRepository.save(user).getWatchlist();
     }
@@ -106,7 +111,9 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new RuntimeException("Content not found"));
+
         user.getWatchlist().remove(content);
         return userRepository.save(user).getWatchlist();
     }
 }
+
