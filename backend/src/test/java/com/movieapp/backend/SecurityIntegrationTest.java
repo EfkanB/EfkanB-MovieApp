@@ -11,6 +11,7 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -99,6 +102,28 @@ class SecurityIntegrationTest {
                 .andExpect(jsonPath("$.password").doesNotExist());
 
         assertThat(userRepository.findByUsername("sahteadmin").orElseThrow().getRole()).isEqualTo(Role.USER);
+    }
+
+    @Test
+    void kayittan_sonra_hos_geldin_maili_gonderilir() throws Exception {
+        register("yeniuye");
+
+        ArgumentCaptor<MimeMessage> mail = ArgumentCaptor.forClass(MimeMessage.class);
+        verify(mailSender, timeout(5000)).send(mail.capture());
+        MimeMessage sent = mail.getValue();
+        assertThat(sent.getAllRecipients()[0].toString()).isEqualTo("yeniuye@example.com");
+        assertThat(sent.getSubject()).contains("hoş geldin").contains("yeniuye");
+    }
+
+    @Test
+    void hos_geldin_maili_gonderilemese_de_kayit_basarili() throws Exception {
+        doThrow(new org.springframework.mail.MailSendException("smtp kapalı"))
+                .when(mailSender).send(any(MimeMessage.class));
+
+        register("mailsizuye");
+
+        verify(mailSender, timeout(5000)).send(any(MimeMessage.class));
+        assertThat(userRepository.findByUsername("mailsizuye")).isPresent();
     }
 
     @Test
