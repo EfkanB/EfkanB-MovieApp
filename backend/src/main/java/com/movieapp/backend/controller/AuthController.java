@@ -5,6 +5,7 @@ import com.movieapp.backend.dto.AuthResponse;
 import com.movieapp.backend.model.Role;
 import com.movieapp.backend.model.User;
 import com.movieapp.backend.service.UserService;
+import com.movieapp.backend.service.WelcomeMailer;
 import com.movieapp.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,9 @@ public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private WelcomeMailer welcomeMailer;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
@@ -53,6 +57,7 @@ public class AuthController {
             user.setEmail(user.getEmail().trim().toLowerCase());
 
             User registeredUser = userService.register(user);
+            welcomeMailer.sendWelcome(registeredUser.getEmail(), registeredUser.getUsername());
 
             AuthResponse response = new AuthResponse(
                     registeredUser.getUsername(),
