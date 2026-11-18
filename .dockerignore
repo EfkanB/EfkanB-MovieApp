@@ -1,0 +1,11 @@
+.git
+.claude
+.env
+.env.*
+!.env.example
+**/node_modules
+frontend/dist
+backend/target
+backend/data
+*.log
+db-seed-*.sql

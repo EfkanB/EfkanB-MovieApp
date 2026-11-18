@@ -22,7 +22,13 @@ const Footer = ({ onMoviesClick, onSeriesClick }) => {
           <a href="#how-it-works">Nasıl çalışır?</a>
           <a href="#plans">Fiyatlandırma</a>
         </nav>
+        <a className="site-footer__privacy" href="/gizlilik">Gizlilik</a>
         <p className="site-footer__note">© {new Date().getFullYear()} MovieApp</p>
+        <p className="site-footer__credit">
+          Film afişleri ve bilgileri <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">TMDB</a>
+          {' '}kaynaklıdır. Bu ürün TMDB API'sini kullanır ancak TMDB tarafından onaylanmamış veya
+          desteklenmemektedir.
+        </p>
       </div>
     </footer>
   );

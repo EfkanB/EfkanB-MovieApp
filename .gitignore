@@ -15,3 +15,4 @@ backend/target/
 # Claude Code kişisel ayarları
 .claude/settings.local.json
 backend/data/
+backend/src/main/resources/static/

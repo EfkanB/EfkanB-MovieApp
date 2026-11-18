@@ -6,13 +6,13 @@ const PLANS = [
     name: 'Ücretsiz',
     price: '0',
     cta: 'Hemen başla',
+    featured: true,
     features: ['Sınırsız keşif', '1-5 yıldız puanlama', 'Standart yorum yapma', 'Temel izleme listesi', 'Reklamlı arayüz'],
   },
   {
     name: 'Temel',
     price: '9,99',
     cta: 'Planı seç',
-    featured: true,
     features: ['Reklamsız arayüz', 'Sınırsız favori listesi', 'Gelişmiş filtreleme', '“Sinemasever” rozeti'],
   },
   {
@@ -24,15 +24,11 @@ const PLANS = [
 ];
 
 const Plans = () => {
-  const showSoon = () => {
-    alert('Bu özellik çok yakında eklenecektir!');
-  };
-
   return (
     <section id="plans" className="plans page-width" aria-labelledby="plans-title">
       <div className="section-head plans__head">
         <h2 id="plans-title">Fiyatlandırma</h2>
-        <p>Ücretsiz başla, istediğin zaman yükselt.</p>
+        <p>Ücretli planlar yakında. Şimdilik tüm özellikler ücretsiz.</p>
       </div>
 
       <div className="plans__grid">
@@ -40,7 +36,7 @@ const Plans = () => {
           <article key={plan.name} className={`plan${plan.featured ? ' plan--featured' : ''}`}>
             <div className="plan__top">
               <h3>{plan.name}</h3>
-              {plan.featured && <span className="plan__badge">Önerilen</span>}
+              {plan.price !== '0' && <span className="plan__badge plan__badge--soon">Yakında</span>}
             </div>
             <p className="plan__price">
               <span className="plan__currency">$</span>
@@ -55,13 +51,19 @@ const Plans = () => {
                 </li>
               ))}
             </ul>
-            <button
-              type="button"
-              className={`btn ${plan.featured ? 'btn-primary' : 'btn-outline'}`}
-              onClick={showSoon}
-            >
-              {plan.cta}
-            </button>
+            {plan.price === '0' ? (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => window.dispatchEvent(new Event('open-auth'))}
+              >
+                {plan.cta}
+              </button>
+            ) : (
+              <button type="button" className="btn btn-outline" disabled>
+                Yakında
+              </button>
+            )}
           </article>
         ))}
       </div>
