@@ -28,16 +28,22 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
             // Güvenlik: Dışarıdan biri admin olamasın diye varsayılan olarak USER atıyoruz
-            user.setRole(Role.USER); 
-            
+            user.setRole(Role.USER);
+
+            // Email kontrolü (nullable/unique var)
+            if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "E-posta zorunludur"));
+            }
+
             User registeredUser = userService.register(user);
-            
+
             AuthResponse response = new AuthResponse(
-                registeredUser.getUsername(),
-                registeredUser.getRole().name(),
-                jwtUtil.generateToken(registeredUser.getUsername())
+                    registeredUser.getUsername(),
+                    registeredUser.getRole().name(),
+                    jwtUtil.generateToken(registeredUser.getUsername())
             );
-            
+
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -45,6 +51,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginRequest) {

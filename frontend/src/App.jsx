@@ -4,12 +4,18 @@ import AuthForm from './components/AuthForm';
 import Showcase from './components/Showcase';
 import MovieList from './components/MovieList';
 import AccountPanel from './components/AccountPanel';
-import AdminPanel from './components/AdminPanel';
+import AdminDashboard from './components/AdminDashboard';
+
+
 import HowItWorks from './components/HowItWorks';
 import Features from './components/Features';
 import Plans from './components/Plans';
 import BackToTop from './components/BackToTop';
 import './App.css';
+
+// MovieList'ten tetiklenen global event (giriş sayfasına yönlendirme)
+import { attachOpenAuthListener } from './components/openAuthListener';
+
 
 function App() {
   const [view, setView] = useState('home');
@@ -109,7 +115,17 @@ function App() {
     localStorage.removeItem('role');
   };
 
+  useEffect(() => {
+    // MovieList'te “giriş yapın” ctasına basınca AuthForm'u aç
+    const detach = attachOpenAuthListener(() => {
+      setShowAuth(true);
+    });
+    return () => detach();
+  }, []);
+
   return (
+
+
     <div id="body">
       <Header
         onLoginClick={handleLoginClick}
@@ -132,7 +148,8 @@ function App() {
         ) : view === 'account' ? (
           <AccountPanel token={token} username={username} initialSection={accountSection} />
         ) : view === 'admin' ? (
-          <AdminPanel token={token} username={username} />
+          <AdminDashboard token={token} />
+
         ) : (
           <>
             <Showcase />

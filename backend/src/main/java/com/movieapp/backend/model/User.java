@@ -1,6 +1,7 @@
 package com.movieapp.backend.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,14 +18,19 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(unique = true, nullable = false)
+    private String email;
+
     @Column(nullable = false)
     private String password;
+
 
     // Rolü String yerine Enum yaptık (Admin/User kontrolü daha güvenli olsun diye)
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
     // Artık sadece Movie değil, Content (Film+Dizi) ekleyebiliyoruz
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "user_favorites",
@@ -34,6 +40,7 @@ public class User {
     private Set<Content> favorites = new HashSet<>();
 
     // Watchlist için de Content kullanıyoruz
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "user_watchlist",
@@ -43,6 +50,7 @@ public class User {
     private Set<Content> watchlist = new HashSet<>();
 
     // Kullanıcının yaptığı yorumlar
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
@@ -55,6 +63,13 @@ public class User {
         this.username = username;
         this.password = password;
     }
+
+    public User(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
+
 
     // --- GETTERS & SETTERS ---
 
@@ -74,9 +89,18 @@ public class User {
         this.username = username;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getPassword() {
         return password;
     }
+
 
     public void setPassword(String password) {
         this.password = password;

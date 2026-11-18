@@ -4,16 +4,19 @@ import './Header.css';
 const Header = ({ onLoginClick, onHomeClick, onSeriesClick, onMoviesClick, onAdminClick, onAccountClick, onFavoritesClick, onLogout, isLoggedIn, username, role, searchQuery, onSearchChange }) => {
   return (
     <header className="main-header">
-      <a
-        href="#"
-        className="main-header__logo"
-        onClick={(event) => {
-          event.preventDefault();
-          onHomeClick();
-        }}
-      >
-        MovieApp
-      </a>
+      <div className="main-header__left">
+        <a
+          href="#"
+          className="main-header__logo"
+          onClick={(event) => {
+            event.preventDefault();
+            onHomeClick();
+          }}
+        >
+          MovieApp
+        </a>
+      </div>
+
       <div className="header-search">
         <input
           type="search"
@@ -23,6 +26,7 @@ const Header = ({ onLoginClick, onHomeClick, onSeriesClick, onMoviesClick, onAdm
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
+
       <nav className="main-nav">
         <ul className="main-nav__items">
           <li className="main-nav__item">
@@ -42,6 +46,7 @@ const Header = ({ onLoginClick, onHomeClick, onSeriesClick, onMoviesClick, onAdm
               </a>
             </li>
           )}
+
           <li className="main-nav__item main-nav__item--login">
             {isLoggedIn ? (
               <div className="account-actions">
@@ -62,7 +67,7 @@ const Header = ({ onLoginClick, onHomeClick, onSeriesClick, onMoviesClick, onAdm
                 </button>
               </div>
             ) : (
-              <button type="button" className="btn btn-secondary" onClick={onLoginClick}>
+              <button type="button" className="btn btn-login" onClick={onLoginClick}>
                 Giriş Yap
               </button>
             )}
@@ -70,6 +75,7 @@ const Header = ({ onLoginClick, onHomeClick, onSeriesClick, onMoviesClick, onAdm
         </ul>
       </nav>
     </header>
+
   );
 };
 

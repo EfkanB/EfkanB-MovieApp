@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -31,15 +32,27 @@ public class ReviewService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new RuntimeException("Content not found"));
 
-        if (rating < 1 || rating > 10) {
-            throw new RuntimeException("Rating must be between 1 and 10");
+        if (rating < 1 || rating > 5) {
+            throw new RuntimeException("Rating must be between 1 and 5");
         }
 
-        Review review = new Review();
-        review.setUser(user);
-        review.setContent(content);
-        review.setRating(rating);
-        review.setComment(comment);
+        // Check if user already reviewed this content
+        Optional<Review> existingReview = reviewRepository.findByUserAndContent(user, content);
+        
+        Review review;
+        if (existingReview.isPresent()) {
+            // Update existing review
+            review = existingReview.get();
+            review.setRating(rating);
+            review.setComment(comment);
+        } else {
+            // Create new review
+            review = new Review();
+            review.setUser(user);
+            review.setContent(content);
+            review.setRating(rating);
+            review.setComment(comment);
+        }
 
         return reviewRepository.save(review);
     }
@@ -49,6 +62,16 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Content not found"));
 
         return reviewRepository.findByContent(content);
+    }
+
+    public Map<String, Object> getRatingStats(Long contentId) {
+        Double averageRating = reviewRepository.getAverageRatingByContentId(contentId);
+        Long reviewCount = reviewRepository.getReviewCountByContentId(contentId);
+
+        return Map.of(
+            "averageRating", averageRating != null ? Math.round(averageRating * 10.0) / 10.0 : null,
+            "reviewCount", reviewCount != null ? reviewCount : 0
+        );
     }
 
     public Optional<Review> getReviewById(Long reviewId) {
