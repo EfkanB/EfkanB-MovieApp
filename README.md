@@ -1,5 +1,9 @@
 #  MovieApp: Full-Stack Content Platform
 
+**Live demo: [movieapp-ye06.onrender.com](https://movieapp-ye06.onrender.com)**
+
+> Hosted on a free plan: the server sleeps after 15 minutes without visitors, so the first request can take up to a minute while it wakes up.
+
 MovieApp is a modern, end-to-end content management platform where users can discover, rate, and manage movies and TV series. The project is built following **Layered Architecture** and **Object-Oriented Programming (OOP)** principles, ensuring industrial standards for code quality, scalability, and maintainability.
 
 ##  Key Features
@@ -7,17 +11,19 @@ MovieApp is a modern, end-to-end content management platform where users can dis
 *   **Advanced Data Modeling (Polymorphism):** Implementation of **JPA Joined Inheritance** for `Movie` and `Series` entities inherited from a base `Content` class.
 *   **Secure Authentication:** Robust sign-up and login flow integrated with **Spring Security** and **JWT (JSON Web Token)**.
 *   **Dual List Management:** Users can independently manage their **Favorites** and **Watchlist**.
-*   **Review & Rating System:** Built-in functionality for users to leave comments and rate content on a scale of 1-10.
+*   **Review & Rating System:** Users rate content with 1–5 stars and leave comments; averages are shown on a 10-point scale.
 *   **Dynamic Search:** Real-time search functionality filtered by title using optimized backend queries.
 *   **Role-Based Access Control (RBAC):** Distinction between `USER` and `ADMIN` roles, featuring a restricted Admin Panel for content creation and management.
 *   **Automatic Seed Data:** Built-in initializer to populate the database with popular titles upon application startup.
+*   **Security:** BCrypt password hashing, JWT with server-side session revocation on password change, per-IP rate limiting on auth endpoints, strict CORS and Content-Security-Policy headers, and integration tests covering the main attack paths.
 
 ##  Tech Stack
 
 *   **Backend:** Java 17, Spring Boot 3, Spring Security, JWT, Spring Data JPA, Hibernate
-*   **Frontend:** React.js, Vite, CSS3 (Responsive UI), Axios
-*   **Database:** MySQL
-*   **Tools & Build:** Maven, Git, Postman
+*   **Frontend:** React, Vite, CSS (responsive, custom design system), Lucide icons
+*   **Database:** PostgreSQL ([Neon](https://neon.com)) in production, MySQL or H2 locally
+*   **Hosting:** [Render](https://render.com) (Docker), transactional email via [Brevo](https://www.brevo.com)
+*   **Tools & Build:** Maven, npm, Docker, Git
 
 ---
 
@@ -70,13 +76,14 @@ UPDATE users SET role = 'ADMIN' WHERE username = 'your-username';
 ## Tests
 
 ```bash
-cd backend && mvn test     # integration tests on an in-memory H2 database (no MySQL needed)
+cd backend && mvn test     # 18 tests on an in-memory H2 database (no MySQL needed)
 cd frontend && npm run lint
 ```
 
 ## Deployment
 
-**Free hosting (Render + Neon + Brevo):** step-by-step guide in Turkish: [`DEPLOY.md`](DEPLOY.md).
+The live demo runs on **Render + Neon + Brevo**, all on free plans. Step-by-step guide (in Turkish): [`DEPLOY.md`](DEPLOY.md).
+Every push to `main` is deployed automatically.
 The [`Dockerfile`](Dockerfile) builds the frontend and serves it from the Spring Boot jar, so the whole app is a single service; [`render.yaml`](render.yaml) sets it up on Render.
 
 **Own server:** build the image with `docker build -t movieapp .`, or run Nginx in front of the jar — see [`deploy/nginx.conf`](deploy/nginx.conf). Enable HTTPS (e.g. `certbot --nginx`).
