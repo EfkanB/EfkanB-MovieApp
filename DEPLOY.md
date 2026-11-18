@@ -16,14 +16,11 @@ Toplam maliyet: **0 $**. Üç ücretsiz hesap açacaksın. Şifreleri ve anahtar
 
 1. https://neon.com adresinde hesap aç (GitHub ile girebilirsin).
 2. **Create project** → bölge olarak **AWS Europe Central (Frankfurt)** seç (Render ile aynı bölge, daha hızlı).
-3. Proje açılınca **Connect** düğmesine bas:
-   - **Connection pooling** seçeneğini **kapat** (Hibernate havuzlanmış bağlantıyla sorun çıkarabilir).
-   - Bağlantı adresi şuna benzer: `postgresql://KULLANICI:SIFRE@ep-xxx.eu-central-1.aws.neon.tech/neondb?sslmode=require`
-4. Bu adresten üç değer çıkar:
-   - `DB_URL` = `jdbc:postgresql://ep-xxx.eu-central-1.aws.neon.tech/neondb?sslmode=require`
-     (başına `jdbc:` ekle, `KULLANICI:SIFRE@` kısmını sil)
-   - `DB_USERNAME` = `KULLANICI`
-   - `DB_PASSWORD` = `SIFRE`
+3. Proje açılınca **Connect** düğmesine bas, **Connection pooling** seçeneğini **kapat** ve adresi kopyala.
+   Adres şuna benzer: `postgresql://KULLANICI:SIFRE@ep-xxx.eu-central-1.aws.neon.tech/neondb?sslmode=require`
+   - `DATABASE_URL` = bu adresin tamamı (uygulama kendisi Java formatına çevirir)
+
+   > Bu projede Neon zaten bağlı: aynı adres bilgisayarındaki `.env.local` dosyasında `DATABASE_URL_UNPOOLED` satırında duruyor. Oradan da kopyalayabilirsin. Bu dosyayı kimseyle paylaşma; git'e girmiyor.
 
 Tablolar uygulama ilk açıldığında otomatik oluşur, örnek filmler de eklenir.
 
@@ -44,7 +41,7 @@ Tablolar uygulama ilk açıldığında otomatik oluşur, örnek filmler de eklen
 
    | Değişken | Değer |
    |---|---|
-   | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Neon'dan (1. adım) |
+   | `DATABASE_URL` | Neon'dan (1. adım) |
    | `BREVO_API_KEY`, `MAIL_FROM` | Brevo'dan (2. adım) |
    | `CORS_ALLOWED_ORIGINS` | Sitenin adresi, örn. `https://movieapp.onrender.com` |
    | `FRONTEND_RESET_PASSWORD_URL` | Sitenin adresi + `/reset-password`, örn. `https://movieapp.onrender.com/reset-password` |
