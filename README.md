@@ -2,7 +2,7 @@
 
 **Live demo: [movieapp-ye06.onrender.com](https://movieapp-ye06.onrender.com)**
 
-> Hosted on a free plan: the server sleeps after 15 minutes without visitors, so the first request can take up to a minute while it wakes up.
+> ⏳ **First visit may be slow:** the app runs on a free plan, so the server sleeps after 15 minutes without visitors. The first request can take up to a minute while it wakes up. This is normal, so please wait instead of refreshing.
 
 MovieApp is a modern, end-to-end content management platform where users can discover, rate, and manage movies and TV series. The project is built following **Layered Architecture** and **Object-Oriented Programming (OOP)** principles, ensuring industrial standards for code quality, scalability, and maintainability.
 
