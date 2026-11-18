@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ChevronDown, MessageSquare } from 'lucide-react';
 import StarRating from './StarRating';
 import './ReviewSection.css';
 
@@ -148,31 +149,32 @@ const ReviewSection = ({ contentId, token, username, isAdmin = false }) => {
     <div className="review-section">
       <button
         type="button"
-        className="review-toggle-btn"
+        className={`review-toggle-btn${showReviews ? ' is-open' : ''}`}
+        aria-expanded={showReviews}
         onClick={() => setShowReviews((prev) => !prev)}
       >
-        {showReviews
-          ? 'Yorumları Gizle'
-          : `Yorumları Göster (${stats.reviewCount})`}
+        <MessageSquare size={16} aria-hidden="true" />
+        <span>{stats.reviewCount > 0 ? `${stats.reviewCount} yorum` : 'Yorum yap'}</span>
+        <ChevronDown className="review-toggle-btn__chevron" size={16} aria-hidden="true" />
       </button>
 
       {showReviews && (
         <div className="review-content">
 
-          {token && (
+          {token ? (
             <form className="review-form" onSubmit={handleSubmitReview}>
-              <h4>Puanla ve Yorum Yap</h4>
               <div className="rating-input">
-                <label>Puanın:</label>
+                <span className="rating-input__label">Puanın</span>
                 <StarRating
                   rating={newRating}
                   onRatingChange={setNewRating}
                   maxStars={5}
                 />
-                <span className="rating-text">{newRating}/5</span>
               </div>
               <textarea
-                placeholder="Yorumunuzu yazın..."
+                placeholder="Ne düşündün?"
+                aria-label="Yorumun"
+                maxLength={500}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 rows={3}
@@ -181,27 +183,34 @@ const ReviewSection = ({ contentId, token, username, isAdmin = false }) => {
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? 'Gönderiliyor...' : 'Gönder'}
               </button>
-              {error && <p className="error-message">{error}</p>}
+              {error && <p className="error-message" role="alert">{error}</p>}
             </form>
+          ) : (
+            <p className="review-login">
+              Puan vermek ve yorum yazmak için{' '}
+              <button type="button" className="link-btn" onClick={() => window.dispatchEvent(new Event('open-auth'))}>
+                giriş yap
+              </button>
+              .
+            </p>
           )}
 
           <div className="reviews-list">
-            <h4>Tüm Yorumlar ({stats.reviewCount})</h4>
             {reviews.length === 0 ? (
-              <p>Henüz yorum yok. İlk yorumu siz yapın!</p>
+              <p className="review-empty">Henüz yorum yok. İlk yorumu sen yaz.</p>
             ) : (
               reviews.map((review) => (
                 <div key={review.id} className="review-item">
                   <div className="review-header">
                     <strong>{review.username}</strong>
                     <StarRating rating={review.rating} readonly maxStars={5} />
-                    <span className="review-rating-text">{review.rating}/5</span>
                     <span className="review-date">
                       {new Date(review.createdAt).toLocaleDateString('tr-TR')}
                     </span>
                     {(username === review.username || isAdmin) && (
                       <button
-                        className="btn btn-small btn-danger"
+                        type="button"
+                        className="link-btn link-btn--danger"
                         onClick={() => handleDeleteReview(review.id)}
                       >
                         Sil

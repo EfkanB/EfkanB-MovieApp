@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 
 const ForgotPassword = ({ onClose }) => {
   
@@ -36,10 +37,11 @@ const ForgotPassword = ({ onClose }) => {
   return (
     <section id="auth" className="auth-section">
       <div className="auth-card">
-        <button type="button" className="auth-close" onClick={onClose}>
-          ×
+        <button type="button" className="auth-close" onClick={onClose} aria-label="Kapat">
+          <X size={20} />
         </button>
-        <h2>Şifremi Unuttum</h2>
+        <h2>Şifreni mi unuttun?</h2>
+        <p className="auth-lead">E-posta adresini yaz, sana şifre sıfırlama bağlantısı gönderelim.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
@@ -48,16 +50,17 @@ const ForgotPassword = ({ onClose }) => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
             />
           </label>
 
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Gönderiliyor...' : 'Sıfırlama Linki Gönder'}
+            {loading ? 'Gönderiliyor…' : 'Sıfırlama bağlantısı gönder'}
           </button>
         </form>
 
-        {message && <p className="auth-message">{message}</p>}
+        {message && <p className="auth-message" role="status">{message}</p>}
       </div>
     </section>
   );

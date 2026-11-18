@@ -12,6 +12,7 @@ import HowItWorks from './components/HowItWorks';
 import Features from './components/Features';
 import Plans from './components/Plans';
 import BackToTop from './components/BackToTop';
+import Footer from './components/Footer';
 import './App.css';
 
 // MovieList'ten tetiklenen global event (giriş sayfasına yönlendirme)
@@ -80,16 +81,23 @@ function App() {
     setShowAuth(false);
   };
 
+  // Listeye kaydır (liste yeniden çizildikten sonra)
+  const scrollToList = () => {
+    requestAnimationFrame(() => document.getElementById('icerikler')?.scrollIntoView());
+  };
+
   const handleSeriesClick = () => {
     setView('home');
     setContentType('series');
     setShowAuth(false);
+    scrollToList();
   };
 
   const handleMoviesClick = () => {
     setView('home');
     setContentType('movies');
     setShowAuth(false);
+    scrollToList();
   };
 
   const handleLogout = () => {
@@ -112,9 +120,16 @@ function App() {
     return () => detach();
   }, []);
 
+  const isSearching = searchQuery.trim().length > 0;
+  const activeNav = showAuth
+    ? null
+    : view === 'admin'
+      ? 'admin'
+      : view === 'home' && contentType !== 'all'
+        ? contentType
+        : null;
+
   return (
-
-
     <div id="body">
       <Header
         onLoginClick={handleLoginClick}
@@ -130,6 +145,7 @@ function App() {
         role={role}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        activeNav={activeNav}
       />
       <main>
         {window.location.pathname === '/reset-password' ? (
@@ -143,14 +159,19 @@ function App() {
 
         ) : (
           <>
-            <Showcase />
+            {!isSearching && <Showcase isLoggedIn={!!token} />}
             <MovieList key={username || 'misafir'} token={token} username={username} role={role} searchQuery={searchQuery} contentType={contentType} />
-            <HowItWorks />
-            <Features />
-            <Plans />
+            {!isSearching && (
+              <>
+                <HowItWorks />
+                <Features />
+                <Plans />
+              </>
+            )}
           </>
         )}
       </main>
+      <Footer onMoviesClick={handleMoviesClick} onSeriesClick={handleSeriesClick} />
       {!showAuth && <BackToTop />}
     </div>
   );

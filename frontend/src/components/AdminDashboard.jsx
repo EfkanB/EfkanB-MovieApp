@@ -157,89 +157,96 @@ const AdminDashboard = ({ token }) => {
     }
   };
 
-  const titleLabel = mode === 'movies' ? 'Filmler' : 'Diziler';
+  const isError = message.toLowerCase().includes('hata') || message.toLowerCase().includes('başarısız');
 
   return (
-    <section className="admin-panel">
-      <h2>Admin Dashboard - {titleLabel}</h2>
-
-      <div className="content-type-selector">
-        <h3>İçerik Türü</h3>
-        <div className="type-buttons">
+    <section className="admin-panel page-width" aria-labelledby="admin-title">
+      <div className="admin-head">
+        <h2 id="admin-title">İçerik yönetimi</h2>
+        <div className="segmented" role="tablist" aria-label="İçerik türü">
           <button
             type="button"
-            className={`btn ${mode === 'movies' ? 'btn-primary' : 'btn-outline'}`}
+            role="tab"
+            aria-selected={mode === 'movies'}
+            className={mode === 'movies' ? 'is-active' : ''}
             onClick={() => setMode('movies')}
           >
-            🎬 Filmler
+            Filmler
           </button>
           <button
             type="button"
-            className={`btn ${mode === 'series' ? 'btn-primary' : 'btn-outline'}`}
+            role="tab"
+            aria-selected={mode === 'series'}
+            className={mode === 'series' ? 'is-active' : ''}
             onClick={() => setMode('series')}
           >
-            📺 Diziler
+            Diziler
           </button>
         </div>
       </div>
 
       {message && (
-        <div className={`message ${message.toLowerCase().includes('hata') ? 'error' : 'success'}`}>
+        <div className={`message ${isError ? 'error' : 'success'}`} role={isError ? 'alert' : 'status'}>
           {message}
         </div>
       )}
 
-      <div className="admin-toolbar" style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}>
-        <button type="button" className="btn btn-outline" onClick={startCreate} disabled={loading}>
-          {editingId ? 'Yeni Ekle' : 'Ekle'}
-        </button>
-        <button type="button" className="btn btn-primary" onClick={refresh} disabled={loading || !token}>
-          {loading ? 'Yenileniyor...' : 'Listeyi Güncelle'}
-        </button>
-      </div>
+      <div className="admin-layout">
+        <div className="admin-card">
+          <div className="admin-toolbar">
+            <h3>{list.length} kayıt</h3>
+            <div className="admin-toolbar__actions">
+              <button type="button" className="btn btn-outline btn-small" onClick={refresh} disabled={loading || !token}>
+                {loading ? 'Yenileniyor…' : 'Yenile'}
+              </button>
+              <button type="button" className="btn btn-dark btn-small" onClick={startCreate} disabled={loading}>
+                Yeni ekle
+              </button>
+            </div>
+          </div>
 
-      <div className="admin-table-wrapper" style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
-        <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left', padding: '0.75rem', borderBottom: '1px solid #eee' }}>ID</th>
-              <th style={{ textAlign: 'left', padding: '0.75rem', borderBottom: '1px solid #eee' }}>Başlık</th>
-              <th style={{ textAlign: 'left', padding: '0.75rem', borderBottom: '1px solid #eee' }}>Tür</th>
-              <th style={{ textAlign: 'left', padding: '0.75rem', borderBottom: '1px solid #eee' }}>Yıl</th>
-              <th style={{ textAlign: 'left', padding: '0.75rem', borderBottom: '1px solid #eee' }}>İşlem</th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((item) => (
-              <tr key={item.id}>
-                <td style={{ padding: '0.75rem', borderBottom: '1px solid #f3f3f3' }}>{item.id}</td>
-                <td style={{ padding: '0.75rem', borderBottom: '1px solid #f3f3f3' }}>{item.title}</td>
-                <td style={{ padding: '0.75rem', borderBottom: '1px solid #f3f3f3' }}>{item.genre}</td>
-                <td style={{ padding: '0.75rem', borderBottom: '1px solid #f3f3f3' }}>{item.releaseYear}</td>
-                <td style={{ padding: '0.75rem', borderBottom: '1px solid #f3f3f3', whiteSpace: 'nowrap' }}>
-                  <button type="button" className="btn btn-outline" onClick={() => startEdit(item)} disabled={loading}>
-                    Düzenle
-                  </button>
-                  <span style={{ display: 'inline-block', width: '0.5rem' }} />
-                  <button type="button" className="btn btn-primary" onClick={() => handleDelete(item.id)} disabled={loading}>
-                    Sil
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {list.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ padding: '1rem', color: '#666' }}>
-                  Kayıt bulunamadı.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Başlık</th>
+                  <th scope="col">Tür</th>
+                  <th scope="col">Yıl</th>
+                  <th scope="col"><span className="visually-hidden">İşlemler</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((item) => (
+                  <tr key={item.id} className={editingId === item.id ? 'is-editing' : ''}>
+                    <td className="num">{item.id}</td>
+                    <td className="title">{item.title}</td>
+                    <td>{item.genre}</td>
+                    <td className="num">{item.releaseYear}</td>
+                    <td className="actions">
+                      <button type="button" className="btn btn-ghost btn-small" onClick={() => startEdit(item)} disabled={loading}>
+                        Düzenle
+                      </button>
+                      <button type="button" className="btn btn-small admin-delete" onClick={() => handleDelete(item.id)} disabled={loading}>
+                        Sil
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {list.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="empty">
+                      {loading ? 'Yükleniyor…' : 'Henüz kayıt yok. Sağdaki formdan ilk içeriği ekleyebilirsin.'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
       <form onSubmit={handleSubmit} className="admin-form">
-        <h3>{editingId ? 'Güncelle' : 'Yeni Ekle'} - {mode === 'movies' ? 'Film' : 'Dizi'}</h3>
+        <h3>{editingId ? 'İçeriği düzenle' : mode === 'movies' ? 'Yeni film' : 'Yeni dizi'}</h3>
 
         <div className="form-row">
           <div className="form-group">
@@ -330,9 +337,10 @@ const AdminDashboard = ({ token }) => {
         )}
 
         <button type="submit" className="btn btn-primary" disabled={loading || !token}>
-          {loading ? 'İşleniyor...' : editingId ? 'Güncelle' : 'Ekle'}
+          {loading ? 'Kaydediliyor…' : editingId ? 'Değişiklikleri kaydet' : 'Ekle'}
         </button>
       </form>
+      </div>
     </section>
   );
 };

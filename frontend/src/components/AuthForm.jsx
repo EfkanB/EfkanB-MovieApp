@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 import './AuthForm.css';
 
 import ForgotPassword from './ForgotPassword';
@@ -61,10 +62,15 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
   return (
     <section id="auth" className="auth-section">
       <div className="auth-card">
-        <button type="button" className="auth-close" onClick={onClose}>
-          ×
+        <button type="button" className="auth-close" onClick={onClose} aria-label="Kapat">
+          <X size={20} />
         </button>
-        <h2>{mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol'}</h2>
+        <h2>{mode === 'login' ? 'Tekrar hoş geldin' : 'Hesap oluştur'}</h2>
+        <p className="auth-lead">
+          {mode === 'login'
+            ? 'Favorilerine ve izleme listene kaldığın yerden devam et.'
+            : 'Puan ver, yorum yaz, listelerini oluştur.'}
+        </p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
@@ -73,6 +79,7 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
               required
             />
           </label>
@@ -83,6 +90,7 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 required
               />
             </label>
@@ -93,6 +101,8 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              minLength={mode === 'register' ? 8 : undefined}
               required
             />
           </label>
@@ -109,19 +119,14 @@ const AuthForm = ({ onClose, onAuthSuccess }) => {
         </p>
 
         {mode === 'login' && (
-          <p className="auth-toggle" style={{ marginTop: 12 }}>
-            <button
-              type="button"
-              onClick={() => setShowForgot(true)}
-              style={{ color: '#396eb0', fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer' }}
-            >
-              Şifremi Unuttum?
+          <p className="auth-toggle">
+            <button type="button" onClick={() => setShowForgot(true)}>
+              Şifremi unuttum
             </button>
           </p>
         )}
 
-        {/* React artık burada çökmeyecek çünkü message kesinlikle bir string */}
-        {message && <p className="auth-message">{message}</p>}
+        {message && <p className="auth-message" role="alert">{message}</p>}
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Bookmark, Heart, UserRound } from 'lucide-react';
 import './AccountPanel.css';
 
 const fetchList = async (token, path, errorMessage) => {
@@ -114,10 +115,12 @@ const AccountPanel = ({ token, username, initialSection = 'details' }) => {
     <section className="account-panel">
       <aside className="account-sidebar">
         <div className="account-sidebar__brand">
-          <span className="heart-icon">♥</span>
+          <span className="account-avatar" aria-hidden="true">
+            {username ? username.charAt(0).toUpperCase() : <UserRound size={20} />}
+          </span>
           <div>
-            <strong>Hesabım</strong>
-            <p>Film favorileri ve profil</p>
+            <strong>{username}</strong>
+            <p>Hesabım</p>
           </div>
         </div>
         <nav className="account-nav">
@@ -126,45 +129,51 @@ const AccountPanel = ({ token, username, initialSection = 'details' }) => {
             className={currentSection === 'details' ? 'active' : ''}
             onClick={() => setCurrentSection('details')}
           >
-            Hesap Bilgileri
+            <UserRound size={18} aria-hidden="true" />
+            Hesap bilgileri
           </button>
           <button
             type="button"
             className={currentSection === 'favorites' ? 'active' : ''}
             onClick={() => setCurrentSection('favorites')}
           >
+            <Heart size={18} aria-hidden="true" />
             Favoriler
+            <span className="account-nav__count">{favorites.length}</span>
           </button>
           <button
             type="button"
             className={currentSection === 'watchlist' ? 'active' : ''}
             onClick={() => setCurrentSection('watchlist')}
           >
-            İzleme Listesi
+            <Bookmark size={18} aria-hidden="true" />
+            İzleme listesi
+            <span className="account-nav__count">{watchlist.length}</span>
           </button>
         </nav>
       </aside>
       <div className="account-content">
         {currentSection === 'details' ? (
           <div className="account-card">
-            <h2>Hesap Bilgileri</h2>
-            <p>
-              <strong>Kullanıcı Adı:</strong> {username}
-            </p>
-            <p>
-              <strong>Favori Sayısı:</strong> {favorites.length}
-            </p>
-            <p>
-              <strong>İzleme Listesi Sayısı:</strong> {watchlist.length}
-            </p>
-            <p>Buradan profil bilgilerinizi ve favorilerinizi takip edebilirsiniz.</p>
+            <h2>Hesap bilgileri</h2>
+            <dl className="account-facts">
+              <div>
+                <dt>Kullanıcı adı</dt>
+                <dd>{username}</dd>
+              </div>
+              <div>
+                <dt>Favoriler</dt>
+                <dd>{favorites.length}</dd>
+              </div>
+              <div>
+                <dt>İzleme listesi</dt>
+                <dd>{watchlist.length}</dd>
+              </div>
+            </dl>
           </div>
         ) : currentSection === 'favorites' ? (
           <div className="account-card">
-            <div className="account-card__header">
-              <h2>Favoriler</h2>
-              <span className="heart-icon large">♥</span>
-            </div>
+            <h2>Favoriler</h2>
             {loading ? (
               <p>Favoriler yükleniyor...</p>
             ) : error ? (
@@ -175,16 +184,23 @@ const AccountPanel = ({ token, username, initialSection = 'details' }) => {
               <div className="favorite-grid">
                 {favorites.map((movie) => (
                   <article key={movie.id} className="favorite-card">
+                    {movie.posterUrl ? (
+                      <img className="favorite-card__poster" src={movie.posterUrl} alt="" loading="lazy" />
+                    ) : (
+                      <span className="favorite-card__poster" aria-hidden="true" />
+                    )}
+                    <div className="favorite-card__body">
                     <h3>{movie.title}</h3>
                     <p className="movie-meta">{movie.genre} · {movie.releaseYear}</p>
-                    <p>{movie.description}</p>
+                    <p className="favorite-card__desc">{movie.description}</p>
                     <button
                       type="button"
                       className="remove-button"
                       onClick={() => handleRemoveFavorite(movie.id)}
                     >
-                      Favorilerden Kaldır
+                      Favorilerden kaldır
                     </button>
+                    </div>
                   </article>
                 ))}
               </div>
@@ -192,10 +208,7 @@ const AccountPanel = ({ token, username, initialSection = 'details' }) => {
           </div>
         ) : (
           <div className="account-card">
-            <div className="account-card__header">
-              <h2>İzleme Listesi</h2>
-              <span className="watchlist-icon large">📺</span>
-            </div>
+            <h2>İzleme listesi</h2>
             {loading ? (
               <p>İzleme listesi yükleniyor...</p>
             ) : error ? (
@@ -206,16 +219,23 @@ const AccountPanel = ({ token, username, initialSection = 'details' }) => {
               <div className="favorite-grid">
                 {watchlist.map((movie) => (
                   <article key={movie.id} className="favorite-card">
+                    {movie.posterUrl ? (
+                      <img className="favorite-card__poster" src={movie.posterUrl} alt="" loading="lazy" />
+                    ) : (
+                      <span className="favorite-card__poster" aria-hidden="true" />
+                    )}
+                    <div className="favorite-card__body">
                     <h3>{movie.title}</h3>
                     <p className="movie-meta">{movie.genre} · {movie.releaseYear}</p>
-                    <p>{movie.description}</p>
+                    <p className="favorite-card__desc">{movie.description}</p>
                     <button
                       type="button"
                       className="remove-button"
                       onClick={() => handleRemoveWatchlist(movie.id)}
                     >
-                      İzleme Listesinden Kaldır
+                      İzleme listesinden kaldır
                     </button>
+                    </div>
                   </article>
                 ))}
               </div>
