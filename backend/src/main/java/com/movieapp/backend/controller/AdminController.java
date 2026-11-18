@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "*")
 public class AdminController {
 
     @Autowired
@@ -51,14 +50,9 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Geçerli bir süre zorunludur");
         }
 
-        try {
-            Content savedMovie = contentRepository.save(movie);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedMovie);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Film eklenirken bir hata oluştu: " + e.getMessage());
-        }
+        movie.setId(null); // yeni kayıt: mevcut bir içeriğin üzerine yazılmasın
+        Content savedMovie = contentRepository.save(movie);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedMovie);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -83,13 +77,9 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Geçerli bir bölüm sayısı zorunludur");
         }
 
-        try {
-            Content savedSeries = contentRepository.save(series);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedSeries);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Dizi eklenirken bir hata oluştu: " + e.getMessage());
-        }
+        series.setId(null);
+        Content savedSeries = contentRepository.save(series);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedSeries);
     }
 
 

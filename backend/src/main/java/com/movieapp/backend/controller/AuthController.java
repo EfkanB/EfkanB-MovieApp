@@ -1,5 +1,6 @@
 package com.movieapp.backend.controller;
 
+import com.movieapp.backend.dto.AuthRequest;
 import com.movieapp.backend.dto.AuthResponse;
 import com.movieapp.backend.model.Role;
 import com.movieapp.backend.model.User;
@@ -27,14 +28,29 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
-            // Güvenlik: Dışarıdan biri admin olamasın diye varsayılan olarak USER atıyoruz
+            // Güvenlik: istemciden gelen id ve rol asla kullanılmaz.
+            // id gönderilirse JPA mevcut bir kullanıcının (ör. admin) üzerine yazabilirdi.
+            user.setId(null);
             user.setRole(Role.USER);
 
-            // Email kontrolü (nullable/unique var)
-            if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            String username = user.getUsername() == null ? "" : user.getUsername().trim();
+            if (!username.matches("^[A-Za-z0-9_.-]{3,30}$")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("message", "E-posta zorunludur"));
+                        .body(Map.of("message", "Kullanıcı adı 3-30 karakter olmalı; harf, rakam, _ . - içerebilir"));
             }
+            user.setUsername(username);
+
+            if (user.getPassword() == null || user.getPassword().length() < 8) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Şifre en az 8 karakter olmalı"));
+            }
+
+            // Email kontrolü (nullable/unique var)
+            if (user.getEmail() == null || !user.getEmail().trim().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Geçerli bir e-posta adresi girin"));
+            }
+            user.setEmail(user.getEmail().trim().toLowerCase());
 
             User registeredUser = userService.register(user);
 
@@ -54,7 +70,7 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User loginRequest) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest loginRequest) {
         Optional<User> authenticatedUser = userService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
         
         if (authenticatedUser.isPresent()) {

@@ -18,9 +18,6 @@ const ReviewSection = ({ contentId, token, username }) => {
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-    if (username) {
-      headers['X-Username'] = username;
-    }
     return headers;
   };
 

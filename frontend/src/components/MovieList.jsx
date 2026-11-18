@@ -18,7 +18,6 @@ const MovieList = ({ token, username, searchQuery, contentType = 'all' }) => {
   const authHeaders = () => {
     const headers = {};
     if (token) headers.Authorization = `Bearer ${token}`;
-    if (username) headers['X-Username'] = username;
     return headers;
   };
 

@@ -11,7 +11,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
 public class PasswordResetController {
 
     private final PasswordResetService passwordResetService;
@@ -24,7 +23,7 @@ public class PasswordResetController {
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         try {
             passwordResetService.forgotPassword(request);
-            return ResponseEntity.ok(Map.of("message", "Şifre sıfırlama bağlantısı e-postanıza gönderildi"));
+            return ResponseEntity.ok(Map.of("message", "Bu e-posta kayıtlıysa şifre sıfırlama bağlantısı gönderildi"));
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", ex.getMessage()));
