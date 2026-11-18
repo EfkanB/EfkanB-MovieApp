@@ -13,12 +13,9 @@ services:
       # Oturum anahtarı: Render rastgele ve güçlü bir değer üretir
       - key: JWT_SECRET
         generateValue: true
-      # Neon veritabanı (Neon panelindeki bağlantı bilgilerinden)
-      - key: DB_URL
-        sync: false
-      - key: DB_USERNAME
-        sync: false
-      - key: DB_PASSWORD
+      # Neon veritabanı: bağlantı adresinin tamamı (postgresql://...). Uygulama kendisi JDBC'ye çevirir.
+      # Havuzsuz (doğrudan) adresi kullan: sunucu adında "-pooler" OLMAYAN.
+      - key: DATABASE_URL
         sync: false
       # Brevo (şifre sıfırlama maili)
       - key: BREVO_API_KEY
