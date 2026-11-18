@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Bookmark, Clapperboard, Heart, Star } from 'lucide-react';
 import ReviewSection from './ReviewSection';
 import './MovieList.css';
 
@@ -6,6 +7,35 @@ const getJson = async (url, errorMessage, headers = {}) => {
   const response = await fetch(url, { headers });
   if (!response.ok) throw new Error(errorMessage);
   return response.json();
+};
+
+// Afiş yoksa ya da yüklenemezse başlığın baş harfleriyle tasarlanmış bir yedek gösterilir
+const Poster = ({ src, title }) => {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) {
+    const initials = title
+      .split(/\s+/)
+      .filter((w) => /[\p{L}\d]/u.test(w[0] || ''))
+      .slice(0, 2)
+      .map((w) => w[0].toUpperCase())
+      .join('');
+    return (
+      <div className="poster-fallback" role="img" aria-label={`${title} afişi`}>
+        <Clapperboard size={22} aria-hidden="true" />
+        <span>{initials}</span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={`${title} afişi`}
+      loading="lazy"
+      width="500"
+      height="750"
+      onError={() => setFailed(true)}
+    />
+  );
 };
 
 // Arama varsa arama sonuçlarını, yoksa seçilen türdeki içerikleri getirir
@@ -159,14 +189,14 @@ const MovieList = ({ token, username, role, searchQuery, contentType = 'all' }) 
   const isInWatchlist = (movieId) => watchlistIds.has(movieId);
 
   useEffect(() => {
-    if (searchResults) return undefined;
-
-    const list =
-      contentType === 'movies'
-        ? movies
-        : contentType === 'series'
-          ? series
-          : [...movies, ...series];
+    // Ekranda görünen her kartın puanı lazım: liste, arama sonuçları, favoriler, izleme listesi
+    const list = [
+      ...(searchResults || []),
+      ...(contentType === 'series' ? [] : movies),
+      ...(contentType === 'movies' ? [] : series),
+      ...favoriteMovies,
+      ...watchlistMovies,
+    ];
     const uniqueIds = [...new Set(list.map((c) => c.id))];
     if (uniqueIds.length === 0) return undefined;
 
@@ -184,130 +214,162 @@ const MovieList = ({ token, username, role, searchQuery, contentType = 'all' }) 
     return () => {
       ignore = true;
     };
-  }, [movies, series, contentType, searchResults]);
+  }, [movies, series, contentType, searchResults, favoriteMovies, watchlistMovies]);
 
-  const renderCard = (movie) => {
+  const openAuth = () => window.dispatchEvent(new Event('open-auth'));
+
+  const renderCard = (movie, sectionKey) => {
     const formatted = formatAverageRating(ratingStatsByContentId[movie.id]);
-    const displayValue = formatted ? `${formatted}/10` : '-/10';
+    const favorite = isFavorite(movie.id);
+    const inWatchlist = isInWatchlist(movie.id);
+    const isSeries = getContentTypeLabel(movie) === 'Dizi';
+    const detail = isSeries
+      ? movie.seasonCount ? `${movie.seasonCount} sezon` : null
+      : movie.durationMinutes ? `${movie.durationMinutes} dk` : null;
 
     return (
-      <article key={movie.id} className="movie-card">
-        <div className="movie-card__header">
-          <h3 className="movie-card__title">{movie.title}</h3>
-          <div className="movie-card__labels">
-            <span className="movie-type-badge">{getContentTypeLabel(movie)}</span>
-            <span className="movie-rating-inline">
-              <span className="movie-rating-star">★</span>
-              <span className="movie-rating-value">{displayValue}</span>
-            </span>
+      <article key={`${sectionKey}-${movie.id}`} className="movie-card">
+        <div className="movie-card__poster">
+          <Poster src={movie.posterUrl} title={movie.title} />
+          <span className="movie-type-badge">{getContentTypeLabel(movie)}</span>
+          <div className="movie-card__quick">
+            <button
+              type="button"
+              className={`quick-btn${favorite ? ' is-on' : ''}`}
+              aria-pressed={token ? favorite : undefined}
+              aria-label={
+                token
+                  ? favorite ? `${movie.title}: favorilerden çıkar` : `${movie.title}: favorilere ekle`
+                  : 'Favorilere eklemek için giriş yapın'
+              }
+              title={favorite ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+              onClick={() => (token ? handleToggleFavorite(movie.id, !favorite) : openAuth())}
+            >
+              <Heart size={18} fill={favorite ? 'currentColor' : 'none'} />
+            </button>
+            <button
+              type="button"
+              className={`quick-btn${inWatchlist ? ' is-on' : ''}`}
+              aria-pressed={token ? inWatchlist : undefined}
+              aria-label={
+                token
+                  ? inWatchlist ? `${movie.title}: izleme listesinden çıkar` : `${movie.title}: izleme listesine ekle`
+                  : 'İzleme listesine eklemek için giriş yapın'
+              }
+              title={inWatchlist ? 'İzleme listesinden çıkar' : 'İzleme listesine ekle'}
+              onClick={() => (token ? handleToggleWatchlist(movie.id, !inWatchlist) : openAuth())}
+            >
+              <Bookmark size={18} fill={inWatchlist ? 'currentColor' : 'none'} />
+            </button>
           </div>
         </div>
 
-        <p className="movie-meta">
-          {movie.genre} · {movie.releaseYear}
-        </p>
-        <p className="movie-description">{movie.description}</p>
-
-        {token ? (
-          <div className="movie-actions">
-            <button
-              type="button"
-              className={`btn btn-secondary ${isFavorite(movie.id) ? 'active' : ''}`}
-              onClick={() => handleToggleFavorite(movie.id, !isFavorite(movie.id))}
-            >
-              {isFavorite(movie.id) ? '♥ Favorilerden Çıkar' : '♡ Favorilere Ekle'}
-            </button>
-            <button
-              type="button"
-              className={`btn btn-outline ${isInWatchlist(movie.id) ? 'active' : ''}`}
-              onClick={() => handleToggleWatchlist(movie.id, !isInWatchlist(movie.id))}
-            >
-              {isInWatchlist(movie.id) ? '− İzleme Listesinden Çıkar' : '+ İzleme Listesine Ekle'}
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="btn btn-secondary movie-note movie-login-cta"
-            onClick={() => {
-              // Header içindeki Giriş Yap butonunu tetikleyecek global aksiyon yoksa sadece uyarı verelim.
-              // Bu projede AuthForm sadece Header'dan açılıyor, o yüzden burada gerçek yönlendirme olmayabilir.
-              window.dispatchEvent(new Event('open-auth'));
-            }}
-          >
-            Favorilere ve izleme listesine eklemek için giriş yapın
-          </button>
-        )}
-
-        <ReviewSection contentId={movie.id} token={token} username={username} isAdmin={role === 'ADMIN'} />
+        <div className="movie-card__body">
+          <p className={`movie-rating${formatted ? '' : ' is-empty'}`}>
+            <Star size={15} fill="currentColor" aria-hidden="true" />
+            {formatted ? (
+              <>
+                <span className="movie-rating__value">
+                  <strong>{formatted}</strong>/10
+                </span>
+              </>
+            ) : (
+              <span>Henüz puan yok</span>
+            )}
+          </p>
+          <h3 className="movie-card__title" title={movie.title}>{movie.title}</h3>
+          <p className="movie-meta">
+            {[movie.genre, movie.releaseYear, detail].filter(Boolean).join(' · ')}
+          </p>
+          <p className="movie-description">{movie.description}</p>
+          <ReviewSection contentId={movie.id} token={token} username={username} isAdmin={role === 'ADMIN'} />
+        </div>
       </article>
     );
   };
 
-  const renderSection = (title, items) => (
-    <section className="content-section">
-      <div className="movie-list__toolbar">
-        <h2>{title}</h2>
+  const renderGrid = (items, sectionKey) => (
+    <div className="movie-grid">{items.map((m) => renderCard(m, sectionKey))}</div>
+  );
+
+  const renderSection = (title, items, sectionKey, emptyText) => (
+    <section className="content-section" aria-labelledby={`baslik-${sectionKey}`}>
+      <div className="section-head">
+        <h2 id={`baslik-${sectionKey}`}>{title}</h2>
+        <span className="section-count">{items.length} yapım</span>
       </div>
-      {items.length === 0 ? (
-        <p>{title} bulunamadı.</p>
-      ) : (
-        <div className="movie-grid">{items.map((m) => renderCard(m))}</div>
-      )}
+      {items.length === 0 ? <p className="movie-empty">{emptyText}</p> : renderGrid(items, sectionKey)}
     </section>
   );
 
-  if (loading) return <div className="movie-list">Yükleniyor...</div>;
-  if (error) return <div className="movie-list movie-error">{error}</div>;
-
-  const renderSearchResults = () => (
-    <section className="content-section">
-      <div className="movie-list__toolbar">
-        <h2>{`"${searchQuery}" için arama sonuçları`}</h2>
+  if (loading) {
+    return (
+      <div className="movie-list page-width" id="icerikler" aria-busy="true">
+        <div className="section-head">
+          <h2>Yükleniyor</h2>
+        </div>
+        <div className="movie-grid">
+          {Array.from({ length: 10 }, (_, i) => (
+            <div key={i} className="movie-card movie-card--skeleton" aria-hidden="true">
+              <div className="movie-card__poster" />
+              <div className="movie-card__body">
+                <span className="skeleton-line" />
+                <span className="skeleton-line skeleton-line--short" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-      {searchResults?.length === 0 ? (
-        <p>{`"${searchQuery}" için sonuç bulunamadı.`}</p>
-      ) : (
-        <div className="movie-grid">{searchResults.map((m) => renderCard(m))}</div>
-      )}
-    </section>
-  );
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="movie-list page-width" id="icerikler">
+        <div className="movie-error" role="alert">
+          <p>{error}</p>
+          <button type="button" className="btn btn-outline" onClick={() => window.location.reload()}>
+            Tekrar dene
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <section className="movie-list">
+    <div className="movie-list page-width" id="icerikler">
       {searchResults ? (
-        renderSearchResults()
+        renderSection(
+          `“${searchQuery}” için sonuçlar`,
+          searchResults,
+          'arama',
+          'Bu aramayla eşleşen bir film ya da dizi bulamadık. Farklı bir isim deneyin.'
+        )
       ) : (
         <>
-          {contentType !== 'series' && renderSection('Filmler', movies)}
-          {contentType !== 'movies' && renderSection('Diziler', series)}
+          {contentType !== 'series' && renderSection('Filmler', movies, 'filmler', 'Henüz film eklenmemiş.')}
+          {contentType !== 'movies' && renderSection('Diziler', series, 'diziler', 'Henüz dizi eklenmemiş.')}
         </>
       )}
 
       {token && (
-        <section className="favorite-list">
-          <h2>Favori Filmleriniz</h2>
-          {favoriteMovies.length === 0 ? (
-            <p>Henüz favori eklemediniz.</p>
-          ) : (
-            <div className="movie-grid">{favoriteMovies.map((m) => renderCard(m))}</div>
+        <>
+          {renderSection(
+            'Favorilerin',
+            favoriteMovies,
+            'favoriler',
+            'Henüz favori eklemedin. Bir afişin üzerindeki kalbe dokunarak başlayabilirsin.'
           )}
-        </section>
-      )}
-
-      {token && (
-        <section className="watchlist-list">
-          <h2>İzleme Listeniz</h2>
-          {watchlistMovies.length === 0 ? (
-            <p>Henüz izleme listesine eklemediniz.</p>
-          ) : (
-            <div className="movie-grid">{watchlistMovies.map((m) => renderCard(m))}</div>
+          {renderSection(
+            'İzleme listen',
+            watchlistMovies,
+            'izleme',
+            'İzleme listen boş. Sonra izlemek istediklerini yer imi simgesiyle ekleyebilirsin.'
           )}
-        </section>
+        </>
       )}
-    </section>
+    </div>
   );
 };
 
 export default MovieList;
-

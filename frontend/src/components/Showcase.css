@@ -1,18 +1,187 @@
-#showcase {
-  background: url('/home-bg.jpeg');
-  background-position: center;
-  height: 500px;
-  width: 100%;
-  padding: 10px;
-  position: relative;
+.showcase {
+  padding-top: 24px;
 }
 
-#showcase h1 {
+.showcase__panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: 32px;
+  min-height: 480px;
+  padding: clamp(32px, 5vw, 72px);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(252, 153, 124, 0.22), transparent 55%),
+    radial-gradient(80% 80% at 0% 100%, rgba(46, 76, 109, 0.55), transparent 60%),
+    var(--surface-ink);
+  color: var(--ink-on-dark);
+  overflow: hidden;
+}
+
+.showcase__copy {
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+}
+
+.showcase h1 {
+  color: var(--ink-on-dark);
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+.showcase h1 em {
+  display: block;
+  color: var(--coral);
+}
+
+.showcase__lead {
+  margin-top: 24px;
+  max-width: 46ch;
+  font-size: 18px;
+  color: var(--ink-on-dark-2);
+}
+
+.showcase__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.showcase__secondary {
+  background: transparent;
+  border-color: rgba(247, 239, 231, 0.35);
+  color: var(--ink-on-dark);
+}
+
+.showcase__secondary:hover {
+  border-color: var(--ink-on-dark);
+  background: rgba(247, 239, 231, 0.08);
+}
+
+.showcase__actions .btn:focus-visible {
+  outline-color: var(--coral);
+}
+
+/* Afiş yelpazesi */
+.showcase__posters {
+  position: relative;
+  height: 400px;
+}
+
+.showcase__poster {
   position: absolute;
   top: 50%;
-  margin: 0;
-  color: #fff;
-  font-size: 45px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  margin: 0;
+  width: 200px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--navy);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: poster-fan 1.1s var(--ease-out) both;
+}
+
+.showcase__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.showcase__poster--1 {
+  z-index: 3;
+  --to: translate(-50%, -50%) rotate(0deg);
+  animation-delay: 0.05s;
+}
+
+.showcase__poster--2 {
+  z-index: 2;
+  --to: translate(-118%, -44%) rotate(-9deg) scale(0.9);
+  animation-delay: 0.15s;
+}
+
+.showcase__poster--3 {
+  z-index: 1;
+  --to: translate(18%, -44%) rotate(9deg) scale(0.9);
+  animation-delay: 0.25s;
+}
+
+.showcase__poster {
+  transform: var(--to);
+}
+
+.showcase__poster figcaption {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--r-pill);
+  background: rgba(28, 40, 54, 0.82);
+  color: var(--ink-on-dark);
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.showcase__poster figcaption svg {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+@keyframes poster-fan {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%) rotate(0deg) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: var(--to);
+  }
+}
+
+@media (max-width: 900px) {
+  .showcase__panel {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .showcase__posters {
+    height: 300px;
+  }
+
+  .showcase__poster {
+    width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .showcase {
+    padding-top: 12px;
+  }
+
+  .showcase__posters {
+    height: 240px;
+  }
+
+  .showcase__poster {
+    width: 122px;
+  }
+
+  .showcase__lead {
+    font-size: 16px;
+  }
+
+  .showcase__actions .btn {
+    flex: 1 1 100%;
+  }
 }

@@ -37,7 +37,8 @@ const ResetPassword = () => {
   return (
     <section id="auth" className="auth-section">
       <div className="auth-card">
-        <h2>Yeni Şifre Belirle</h2>
+        <h2>Yeni şifre belirle</h2>
+        <p className="auth-lead">En az 8 karakterlik yeni bir şifre seç.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label>

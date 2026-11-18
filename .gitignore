@@ -14,3 +14,4 @@ backend/target/
 *.iml
 # Claude Code kişisel ayarları
 .claude/settings.local.json
+backend/data/

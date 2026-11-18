@@ -197,6 +197,14 @@ class SecurityIntegrationTest {
     }
 
     @Test
+    void yorumu_olmayan_icerigin_istatistigi_bos_doner() throws Exception {
+        mvc.perform(get("/api/reviews/stats/3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reviewCount").value(0))
+                .andExpect(jsonPath("$.averageRating").doesNotExist());
+    }
+
+    @Test
     void bozuk_istek_400_doner() throws Exception {
         String token = register("bozukistek");
         mvc.perform(post("/api/reviews")

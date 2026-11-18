@@ -1,4 +1,27 @@
+import { Check } from 'lucide-react';
 import './Plans.css';
+
+const PLANS = [
+  {
+    name: 'Ücretsiz',
+    price: '0',
+    cta: 'Hemen başla',
+    features: ['Sınırsız keşif', '1-5 yıldız puanlama', 'Standart yorum yapma', 'Temel izleme listesi', 'Reklamlı arayüz'],
+  },
+  {
+    name: 'Temel',
+    price: '9,99',
+    cta: 'Planı seç',
+    featured: true,
+    features: ['Reklamsız arayüz', 'Sınırsız favori listesi', 'Gelişmiş filtreleme', '“Sinemasever” rozeti'],
+  },
+  {
+    name: 'Premium',
+    price: '19,99',
+    cta: 'Planı seç',
+    features: ['Reklamsız arayüz', 'Detaylı izleme istatistikleri', '“Premium Eleştirmen” rozeti', 'Yeni özelliklere erken erişim'],
+  },
+];
 
 const Plans = () => {
   const showSoon = () => {
@@ -6,62 +29,41 @@ const Plans = () => {
   };
 
   return (
-    <section id="plans">
-      <div className="row">
-        <h2 className="section-title">Fiyatlandırma</h2>
+    <section id="plans" className="plans page-width" aria-labelledby="plans-title">
+      <div className="section-head plans__head">
+        <h2 id="plans-title">Fiyatlandırma</h2>
+        <p>Ücretsiz başla, istediğin zaman yükselt.</p>
+      </div>
 
-        <div className="container clearfix">
-          <div className="plan">
-            <div className="inner-plan">
-              <h2>Ücretsiz (0$)</h2>
-              <h3>0/ay</h3>
-              <ul className="plan__features">
-                <li>Sınırsız keşif</li>
-                <li>1-5 yıldız puanlama</li>
-                <li>Standart yorum yapma</li>
-                <li>Temel izleme listesi</li>
-                <li>Reklamlı arayüz</li>
-              </ul>
-              <div>
-                <button className="btn btn-primary" onClick={showSoon}>Hemen Başla</button>
-              </div>
-
+      <div className="plans__grid">
+        {PLANS.map((plan) => (
+          <article key={plan.name} className={`plan${plan.featured ? ' plan--featured' : ''}`}>
+            <div className="plan__top">
+              <h3>{plan.name}</h3>
+              {plan.featured && <span className="plan__badge">Önerilen</span>}
             </div>
-          </div>
-          <div className="plan plan--featured">
-            <div className="inner-plan recommended_plan">
-              <h2 className="plan__badge">Recommended</h2>
-              <h2>Temel (9.99$ - Önerilen)</h2>
-              <h3>9,99$/ay</h3>
-              <ul className="plan__features">
-                <li>Reklamsız arayüz</li>
-                <li>Sınırsız favori listesi</li>
-                <li>Gelişmiş filtreleme</li>
-                <li>“Sinemasever” rozeti</li>
-              </ul>
-              <div>
-                <button className="btn btn-primary" onClick={showSoon}>Planı Seç</button>
-              </div>
-
-            </div>
-          </div>
-          <div className="plan">
-            <div className="inner-plan">
-              <h2>Premium (19.99$)</h2>
-              <h3>19,99$/ay</h3>
-              <ul className="plan__features">
-                <li>Reklamsız arayüz</li>
-                <li>Detaylı izleme istatistikleri</li>
-                <li>“Premium Eleştirmen” rozeti</li>
-                <li>Yeni özelliklere erken erişim</li>
-              </ul>
-              <div>
-                <button className="btn btn-primary" onClick={showSoon}>Planı Seç</button>
-              </div>
-
-            </div>
-          </div>
-        </div>
+            <p className="plan__price">
+              <span className="plan__currency">$</span>
+              {plan.price}
+              <span className="plan__period">/ay</span>
+            </p>
+            <ul className="plan__features">
+              {plan.features.map((f) => (
+                <li key={f}>
+                  <Check size={18} aria-hidden="true" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              className={`btn ${plan.featured ? 'btn-primary' : 'btn-outline'}`}
+              onClick={showSoon}
+            >
+              {plan.cta}
+            </button>
+          </article>
+        ))}
       </div>
     </section>
   );

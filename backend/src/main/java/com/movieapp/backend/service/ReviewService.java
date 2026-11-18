@@ -9,6 +9,7 @@ import com.movieapp.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,10 +69,11 @@ public class ReviewService {
         Double averageRating = reviewRepository.getAverageRatingByContentId(contentId);
         Long reviewCount = reviewRepository.getReviewCountByContentId(contentId);
 
-        return Map.of(
-            "averageRating", averageRating != null ? Math.round(averageRating * 10.0) / 10.0 : null,
-            "reviewCount", reviewCount != null ? reviewCount : 0
-        );
+        // Map.of null kabul etmez; yorumu olmayan içerikte ortalama null olduğu için HashMap kullanılıyor
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("averageRating", averageRating != null ? Math.round(averageRating * 10.0) / 10.0 : null);
+        stats.put("reviewCount", reviewCount != null ? reviewCount : 0L);
+        return stats;
     }
 
     public Optional<Review> getReviewById(Long reviewId) {

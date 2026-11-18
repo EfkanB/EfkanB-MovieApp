@@ -1,27 +1,9 @@
-:root {
-  --background: #f9f9fb;
-  --text: #1f2937;
-  --border: #d1d5db;
-  --button-bg: #3b82f6;
-  --button-text: #ffffff;
-  --card-bg: #ffffff;
-}
-
-body {
-  margin: 0;
-  font-family: Inter, system-ui, sans-serif;
-  background: var(--background);
-  color: var(--text);
-}
-
 #body {
   min-height: 100vh;
-}
-
-button {
-  cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
 main {
-  padding-top: 90px;
+  flex: 1;
 }

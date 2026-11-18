@@ -1,15 +1,29 @@
-#backtotop {
+.back-to-top {
   position: fixed;
-  bottom: 10px;
-  right: 10px;
+  right: 20px;
+  bottom: 20px;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--ink-on-dark);
+  box-shadow: var(--shadow-2);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out), background-color 0.2s var(--ease-out);
 }
 
-#backtotop i {
-  color: #FC997C;
-  font-size: 45px;
-  transition: color .6s;
+.back-to-top.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
 }
 
-#backtotop i:hover {
-  color: #fb6537;
+.back-to-top:hover {
+  background: var(--navy);
 }
