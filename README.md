@@ -6,6 +6,18 @@
 
 MovieApp is a modern, end-to-end content management platform where users can discover, rate, and manage movies and TV series. The project is built following **Layered Architecture** and **Object-Oriented Programming (OOP)** principles, ensuring industrial standards for code quality, scalability, and maintainability.
 
+## Screenshots
+
+![Home page](docs/screenshots/home.png)
+
+![Movie catalog](docs/screenshots/catalog.png)
+
+<p align="center">
+  <img src="docs/screenshots/login.png" alt="Login" width="64%">
+  &nbsp;
+  <img src="docs/screenshots/mobile.png" alt="Mobile view" width="22%">
+</p>
+
 ## Key Features
 
 **For users**
