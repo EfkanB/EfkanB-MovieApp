@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bookmark, Clapperboard, Heart, Star } from 'lucide-react';
+import { Bookmark, ChevronDown, Clapperboard, Heart, Star } from 'lucide-react';
 import ReviewSection from './ReviewSection';
 import './MovieList.css';
 
@@ -69,6 +69,17 @@ const MovieList = ({ token, username, role, searchQuery, contentType = 'all' }) 
   const [error, setError] = useState('');
 
   const [ratingStatsByContentId, setRatingStatsByContentId] = useState({});
+  // Özeti açılmış kartlar (mobilde özet varsayılan olarak gizli, dokununca açılır)
+  const [expandedCards, setExpandedCards] = useState(new Set());
+
+  const toggleExpanded = (cardKey) => {
+    setExpandedCards((prev) => {
+      const next = new Set(prev);
+      if (next.has(cardKey)) next.delete(cardKey);
+      else next.add(cardKey);
+      return next;
+    });
+  };
 
   const authHeaders = () => {
     const headers = {};
@@ -227,9 +238,18 @@ const MovieList = ({ token, username, role, searchQuery, contentType = 'all' }) 
       ? movie.seasonCount ? `${movie.seasonCount} sezon` : null
       : movie.durationMinutes ? `${movie.durationMinutes} dk` : null;
 
+    const cardKey = `${sectionKey}-${movie.id}`;
+    const expanded = expandedCards.has(cardKey);
+    const descriptionId = `ozet-${cardKey}`;
+
     return (
-      <article key={`${sectionKey}-${movie.id}`} className="movie-card">
-        <div className="movie-card__poster">
+      <article key={cardKey} className={`movie-card${expanded ? ' is-expanded' : ''}`}>
+        <div
+          className="movie-card__poster"
+          onClick={(e) => {
+            if (!e.target.closest('button')) toggleExpanded(cardKey);
+          }}
+        >
           <Poster src={movie.posterUrl} title={movie.title} />
           <span className="movie-type-badge">{getContentTypeLabel(movie)}</span>
           <div className="movie-card__quick">
@@ -277,11 +297,25 @@ const MovieList = ({ token, username, role, searchQuery, contentType = 'all' }) 
               <span>Henüz puan yok</span>
             )}
           </p>
-          <h3 className="movie-card__title" title={movie.title}>{movie.title}</h3>
+          <h3 className="movie-card__title" title={movie.title} onClick={() => toggleExpanded(cardKey)}>
+            {movie.title}
+          </h3>
           <p className="movie-meta">
             {[movie.genre, movie.releaseYear, detail].filter(Boolean).join(' · ')}
           </p>
-          <p className="movie-description">{movie.description}</p>
+          {movie.description && (
+            <button
+              type="button"
+              className="movie-card__hint"
+              aria-expanded={expanded}
+              aria-controls={descriptionId}
+              onClick={() => toggleExpanded(cardKey)}
+            >
+              {expanded ? 'Özeti gizle' : 'Özeti göster'}
+              <ChevronDown size={14} aria-hidden="true" />
+            </button>
+          )}
+          <p className="movie-description" id={descriptionId}>{movie.description}</p>
           <ReviewSection contentId={movie.id} token={token} username={username} isAdmin={role === 'ADMIN'} />
         </div>
       </article>

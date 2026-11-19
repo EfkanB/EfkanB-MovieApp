@@ -169,6 +169,51 @@
   text-overflow: ellipsis;
 }
 
+.movie-card__poster,
+.movie-card__title {
+  cursor: pointer;
+}
+
+.movie-card__hint {
+  display: none;
+  align-self: flex-start;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.movie-card__hint svg {
+  transition: transform 0.2s ease;
+}
+
+.movie-card__hint:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.movie-card.is-expanded .movie-card__hint svg {
+  transform: rotate(180deg);
+}
+
+.movie-card.is-expanded .movie-card__title,
+.movie-card.is-expanded .movie-meta {
+  white-space: normal;
+}
+
+.movie-card.is-expanded .movie-description {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
 .movie-meta {
   color: var(--ink-3);
   font-size: 14px;
@@ -251,6 +296,14 @@
 
   .movie-description {
     display: none;
+  }
+
+  .movie-card__hint {
+    display: inline-flex;
+  }
+
+  .movie-card.is-expanded .movie-description {
+    display: block;
   }
 
   .quick-btn {
